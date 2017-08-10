@@ -1,0 +1,329 @@
+#+TITLE: tbx (toolbox) for productivity in information processing
+
+* TODO Introduction
+
+This is my collection of utilities to make my coding as well as a shell script more convenient and productive.
+Another purpose is to limit the surface of my tool chains so that I can be productive.
+Ergonomically, the tool chain surface needs to be limited for human to master it comfortably and fluently.
+In broader sense, there should research and effort on how to augment human intelligence (AHI) with computation tools.
+For the purpose,
+ergonomic tool surface may be an interesting research area.
+
+In this document, not only scripts will be produced but also sample code segment and instructions would be shown.
+This document embeds code with literate programming. The code can be generated from this document.
+
+There will be organized into groups. One of the groups will be file utilities, another group will be pre-processing for machine learning.
+
+They will be mostly higher-level wrappers of the existing libraries. This will serve the purpose of less memory overload. Using these groups of utilities you can reduce the need to remember
+ numerous libraries.
+There may be many useful libraries software but I need to have effective entry point so that I can get my job done quickly reducing the load of memory and the load of searching the right tool.
+It is vitally important to have personal toolboxes to be productive,  as one can be sure to be familiar with the toolbox.
+With these personal toolboxes, the API surface can be focused and limited to suit one's needs and habit.
+
+I may use the Google's python-fire (https://github.com/google/python-fire)
+to ease the workload to convert python libraries into command line tools.
+
+* File handling
+
+This group should complement shutil and pathlib of Python. (shutil is of higher level than os package. pathlib is an object oriented for Path concept.)
+
+With pathlib, mkdir_if_not can be directly implemented. This may be revisited to use pathlib.
+
+#+NAME:mkdir_pathlib
+#+BEGIN_SRC python :noweb yes :tangle :exports none
+
+  Path.mkdir(mode=0o777, parents=False, exist_ok=False)
+
+      Create a new directory at this given path. If mode is given, it is combined with the process’ umask value to determine the file mode and access flags. If the path already exists, FileExistsError is raised.
+
+      If parents is true, any missing parents of this path are created as needed; they are created with the default permissions without taking mode into account (mimicking the POSIX mkdir -p command).
+
+      If parents is false (the default), a missing parent raises FileNotFoundError.
+
+      If exist_ok is false (the default), FileExistsError is raised if the target directory already exists.
+
+      If exist_ok is true, FileExistsError exceptions will be ignored (same behavior as the POSIX mkdir -p command), but only if the last path component is not an existing non-directory file.
+
+      Changed in version 3.5: The exist_ok parameter was added.
+
+#+END_SRC
+
+Also pathlib provides touch function.
+#+NAME:touch_pathlib
+#+BEGIN_SRC python :noweb yes :tangle :exports none
+  from pathlib import Path
+
+  Path('path/to/file.txt').touch()
+#+END_SRC
+
+I should always do expand user (~) for pathname to be sure that they are absolute path to avoid trouble down the road of further processing in all my libraries.
+
+** Preamble
+
+   Import etc.
+
+   #+NAME:preamble_file
+   #+BEGIN_SRC python :noweb yes :tangle ./src/python3/fileTbx.py :exports none
+     import os, shutil
+   #+END_SRC
+
+** mkdir_if_not
+
+   Make directory specified if it does not exist.
+   It returns the tuple of path of the directory and the boolean wthether the directory exists (should by true).
+   It handles the exception that the directory might be created after checking its existence.
+
+ #+NAME:mkdir_if_not
+ #+BEGIN_SRC python :noweb yes :tangle ./src/python3/fileTbx.py :exports none
+  def mkdir_if_not(path):
+      path = os.path.expanduser(path)
+      if not os.path.exists(path):
+          import errno
+          try: # use try to avoid repeated creating the directory, if it's created after the above checking
+              os.makedirs(path)
+          except OSError as e:
+              if e.errno != errno.EEXIST:
+                  raise
+      return path, os.path.exists(path)
+#+END_SRC
+
+** unzip
+
+   unzip a file specified by file_zipped to the directory specified by target_path,
+   making sure the target_path do exist.
+
+#+NAME:unzip
+#+BEGIN_SRC python :noweb yes :tangle ./src/python3/fileTbx.py :exports none
+  def unzip(file_zipped, target_path):
+      target_path = os.path.expanduser(target_path)
+      mkdir_if_not(target_path)
+      import zipfile
+      with zipfile.Zip2017-08-08 10:27:53.180144: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.1 instructions, but these are available on your machine and could speed up CPU computations.
+2017-08-08 10:27:53.180170: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.2 instructions, but these are available on your machine and could speed up CPU computations.
+2017-08-08 10:27:53.180176: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
+2017-08-08 10:27:53.180181: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
+2017-08-08 10:27:53.180185: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use FMA instructions, but these are available on your machine and could speed up CPU computations.
+2017-08-08 10:27:53.528010: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:893] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2017-08-08 10:27:53.528649: I tensorflow/core/common_runtime/gpu/gpu_device.cc:940] Found device 0 with properties:
+name: GeForce GTX 1070
+major: 6 minor: 1 memoryClockRate (GHz) 1.645
+pciBusID 0000:01:00.0
+Total memory: 7.92GiB
+Free memory: 7.32GiB
+2017-08-08 10:27:53.528682: I tensorflow/core/common_runtime/gpu/gpu_device.cc:961] DMA: 0
+2017-08-08 10:27:53.528692: I tensorflow/core/common_runtime/gpu/gpu_device.cc:971] 0:   Y
+2017-08-08 10:27:53.528713: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1030] Creating TensorFlow device (/gpu:0) -> (device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0)
+Device mapping:
+/job:localhost/replica:0/task:0/gpu:0 -> device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0
+2017-08-08 10:27:53.609874: I tensorflow/core/common_runtime/direct_session.cc:265] Device mapping:
+/job:localhost/replica:0/task:0/gpu:0 -> device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0
+
+MatMul: (MatMul): /job:localhost/replica:0/task:0/gpu:0
+2017-08-08 10:27:53.629104: I tensorflow/core/common_runtime/simple_placer.cc:847] MatMul: (MatMul)/job:localhost/replica:0/task:0/gpu:0
+b: (Const): /job:localhost/replica:0/task:0/gpu:0
+2017-08-08 10:27:53.629124: I tensorflow/core/common_runtime/simple_placer.cc:847] b: (Const)/job:localhost/replica:0/task:0/gpu:0
+a: (Const): /job:localhost/replica:0/task:0/gpu:0
+2017-08-08 10:27:53.629131: I tensorflow/core/common_runtime/simple_placer.cc:847] a: (Const)/job:localhost/replica:0/task:0/gpu:0
+File(file_zipped, 'r') as zip_ref:
+          zip_ref.extractall(target_path)
+#+END_SRC
+
+** random_file_name
+
+   Generate a random file name with suffix as parameter.
+
+#+NAME:random_file_name
+#+BEGIN_SRC python :noweb yes :tangle :exports none
+  import random, string, os
+
+  def random_file_name(suffix, length=10):
+      return ''.join(random.choice(string.lowercase) for i in range(length)) + '.' + suffix
+
+#+END_SRC
+
+#+NAME:random_file_name_test
+#+BEGIN_SRC python :noweb yes :tangle :exports none
+  file_name = random_file_name('txt')
+
+  status = os.path.exists(file_name)
+
+  def touch_old(fname, times=None):
+      with open(fname, "a"):
+          os.utime(fname, times)
+
+  status = os.getcwd()
+  import pathlib
+  pathlib.Path(file_name).touch()
+  status = os.path.exists(file_name)
+
+
+#+END_SRC
+
+* Pre-processing for machine learning
+
+** prepare_training_samples
+
+   Move the samples in path according to their categories into their corresponding directories named by their categories.
+   This is a convention in Keras deep learning.
+
+   The determination of the category for a sample (file) is determined by the function category_f.
+   It should raise ValueError exception if there is no category can be found for the sample.
+   If there is no category found for a sample (file), then do nothing against (pass).
+
+   #+NAME:prepare_training_samples
+   #+BEGIN_SRC python :noweb yes :tangle ./src/python3/preProcessingML.py :exports none
+     def prepare_training_samples(path, category_f):
+         path = os.path.expanduser(path)
+
+         for f in os.listdir(path):
+             try:
+                 category_gory_dir = path + category_f(f) + '/'
+                 mkdir_if_not(category_dir)
+                 shutil.move(path + f, category_dir)
+             except ValueError as e:
+                 pass
+   #+END_SRC
+   Use shutil.move is considered more higher level than os.rename.
+
+*** category_f
+
+    Categorize the training data for you to file of a training center computer category based on the computer depository make directory if needed then move that piece of data into that corrupt responding categories I can generalize the function of category for a training file (image)
+
+    An instance of category_f to determine the category of a file,
+    by the first segment of the proper file name (the segments are separated by dot '.'.
+
+    #+NAME:category_f_by_name
+    #+BEGIN_SRC python :noweb yes :tangle ./src/python3/preProcessingML.py :exports none
+      def category_f(file_name):
+          file_name = os.path.basename(file_name)
+          proper_name = os.path.splitext(file_name)[0]
+          return proper_name[:proper_name.index('.')]
+    #+END_SRC
+
+** Randomly select a sublist
+
+#+NAME:random_sublist
+#+BEGIN_SRC python :noweb yes :tangle ./src/python3/preProcessingML.py :exports none
+  lst = [1, 2, 3, 4, 5, 6]
+  def random_split(lst, x):
+      import random
+      random.shuffle(lst)
+
+      return lst[:x], lst[x:]
+
+  train, valid = random_split(lst, 2)
+
+#+END_SRC
+
+** validation_split
+
+#+NAME:validation_split
+#+BEGIN_SRC python :noweb yes :tangle ./src/python3/preProcessingML.py :exports none
+  def validation_split(train_dir, valid_dir=None, valid_percentage=0.01):
+      """
+      Splitting from training set samples for validation.
+      The training samples are in train_dir.
+      The validation samples should be in valid_dir.
+      The valid_percentage is the percentage of the training set to be validation.
+
+      It is assumed that train_dir have samples organized into subdirectories named by categories.
+      """
+      from pathlib import Path, PurePosixPath
+      import os, shutil
+      valid_dir = valid_dir or PurePosixPath(train_dir).parent.joinpath('valid').as_posix()
+      pathlib.Path(valid_dir).mkdir(exist_ok=True)
+      for d in os.listdir(train_dir):
+          lst = os.listdir(train_dir+d)
+          valid_len = int(len(lst)*valid_percentage)
+          valid_lst, _ = random_split(lst, valid_len)
+          p_valid_sub = valid_dir+d
+          pathlib.Path(p_valid_sub).mkdir(exist_ok=True)
+          for f in valid_lst:
+              shutil.move(train_dir+d+'/'+f, p_valid_sub)
+#+END_SRC
+
+* Confirmation of GPU working with TensorFlow
+
+#+NAME:if-GPU-works
+#+BEGIN_SRC python :noweb yes :tangle :exports none
+  import tensorflow as tf
+  with tf.device('/gpu:0'):
+      a = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[2, 3], name='a')
+      b = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[3, 2], name='b')
+      c = tf.matmul(a, b)
+
+  with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
+      print (sess.run(c))
+#+END_SRC
+
+Below output from the shell console where jupyter notebook server is run shows that GPU with TensorFlow is working:
+
+2017-08-08 10:27:53.180144: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.1 instructions, but these are available on your machine and could speed up CPU computations.
+2017-08-08 10:27:53.180170: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.2 instructions, but these are available on your machine and could speed up CPU computations.
+2017-08-08 10:27:53.180176: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
+2017-08-08 10:27:53.180181: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
+2017-08-08 10:27:53.180185: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use FMA instructions, but these are available on your machine and could speed up CPU computations.
+2017-08-08 10:27:53.528010: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:893] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2017-08-08 10:27:53.528649: I tensorflow/core/common_runtime/gpu/gpu_device.cc:940] Found device 0 with properties:
+name: GeForce GTX 1070
+major: 6 minor: 1 memoryClockRate (GHz) 1.645
+pciBusID 0000:01:00.0
+Total memory: 7.92GiB
+Free memory: 7.32GiB
+2017-08-08 10:27:53.528682: I tensorflow/core/common_runtime/gpu/gpu_device.cc:961] DMA: 0
+2017-08-08 10:27:53.528692: I tensorflow/core/common_runtime/gpu/gpu_device.cc:971] 0:   Y
+2017-08-08 10:27:53.528713: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1030] Creating TensorFlow device (/gpu:0) -> (device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0)
+Device mapping:
+/job:localhost/replica:0/task:0/gpu:0 -> device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0
+2017-08-08 10:27:53.609874: I tensorflow/core/common_runtime/direct_session.cc:265] Device mapping:
+/job:localhost/replica:0/task:0/gpu:0 -> device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0
+
+MatMul: (MatMul): /job:localhost/replica:0/task:0/gpu:0
+2017-08-08 10:27:53.629104: I tensorflow/core/common_runtime/simple_placer.cc:847] MatMul: (MatMul)/job:localhost/replica:0/task:0/gpu:0
+b: (Const): /job:localhost/replica:0/task:0/gpu:0
+2017-08-08 10:27:53.629124: I tensorflow/core/common_runtime/simple_placer.cc:847] b: (Const)/job:localhost/replica:0/task:0/gpu:0
+a: (Const): /job:localhost/replica:0/task:0/gpu:0
+2017-08-08 10:27:53.629131: I tensorflow/core/common_runtime/simple_placer.cc:847] a: (Const)/job:localhost/replica:0/task:0/gpu:0
+
+* Shell script to add to a new github repository
+
+The following script perform the initial upload of a local repository to a newly created github repository.
+The resulted script is in "~/bin/add-new-repository"
+
+The script's execution permission need to be changed after tangled.
+
+#+BEGIN_SRC sh
+  chmod 704 ~/bin/add-new-repository
+#+END_SRC
+
+The following is an example of the execution.
+#+BEGIN_SRC sh
+  add-new-repository write-slides-with-jupyter
+#+END_SRC
+
+It must have one argument of the name of the repository.
+
+#+NAME:add-new-repository
+#+BEGIN_SRC python :noweb yes :tangle ~/bin/add-new-repository :exports none
+  #!/home/yubrshen/miniconda3/bin/python
+  from subprocess import call
+  import sys
+  #git remote set-url origin git@github.com:yubrshen/write-slides-with-jupyter.git
+  #git remote add origin git@github.com:yubrshen/write-slides-with-jupyter.git
+  user_host = "git@github.com:yubrshen/"
+  url = user_host + sys.argv[1] + ".git"
+  action = "set-url"
+  # action = "add" # for initial setup origin url
+  call(["git", "remote", action, "origin", url])  # this works!
+  call(["git", "push", "origin", "master"])
+#+END_SRC
+
+Note: to have the command line arguments working, each parameter separated by space
+must be a separated element in the array.
+
+* Effective writing slides
+
+As of Aug., 2017, my choice of slide writing is jupyter notebook with reveal.js,
+for details, here is the tutorial on how to get started quickly.
+
+https://github.com/yubrshen/write-slides-with-jupyter
