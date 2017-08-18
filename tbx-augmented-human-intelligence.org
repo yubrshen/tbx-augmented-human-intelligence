@@ -382,3 +382,41 @@ https://github.com/yubrshen/write-slides-with-jupyter
     - forward-sexp
 *** Move to previous sibling
     - backward-sexp
+
+** Define an emacs lisp function and bind it to a key in a major mode (work-flow)
+   1. Define the function: the crucial factor is to call (interactive) at the beginning of the function body.
+      For example,
+      #+NAME:
+      #+BEGIN_SRC emacs-lisp
+        (defun my-try-cdlatex-tab ()
+          "Call org-try-cdlatex-tab interactively"
+          (interactive)
+          (org-try-cdlatex-tab))
+      #+END_SRC
+
+   2. Bind the function to a key binding in the designated major mode, manually
+      To bind a key just in the current major mode, type M-x local-set-key <RET> key cmd <RET>.
+      To bind a key to globally, type M-x global-set-key <RET> key cmd <RET>
+
+   3. Recover the key binding code and put them into code file
+      To make the process of binding keys interactively easier, use the following “trick”: First bind the key interactively, then
+      immediately type C-x <ESC> <ESC> C-a C-k C-g. Now, the command needed to bind the key is in the kill ring, and can be yanked into your file
+
+   4. Embed the code of local-set-key into the designated major mode hook, e.g.
+
+     #+NAME:
+     #+BEGIN_SRC emacs-lisp
+       (add-hook 'org-mode-hook
+                 (lambda ()
+                   (local-set-key [C-S-iso-lefttab] (quote my-try-cdlatex-tab))))
+     #+END_SRC
+     Ref: https://www.gnu.org/software/emacs/manual/html_node/efaq/Binding-keys-to-commands.html
+
+* Effective with web browsing
+
+** Cycle through tabs in Chrome browser
+
+   Ctrl+SHIFT+TAB
+
+** Switch to previous tab in Chrome browser
+   Allt+w (with a plugging installed)
