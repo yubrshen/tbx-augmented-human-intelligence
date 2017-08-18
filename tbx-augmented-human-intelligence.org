@@ -330,6 +330,19 @@ https://github.com/yubrshen/write-slides-with-jupyter
 
 * Effective with Emacs
 
+** Disable undersore-to-subscript in org-mode export
+   Have the option in the org-mode file:
+   #+OPTIONS: ^:nil
+
+   ref: https://stackoverflow.com/questions/698562/disabling-underscore-to-subscript-in-emacs-org-mode-export
+** Understanding of org-mode's option syntax
+
+   #+OPTIONS: ^:nil
+
+   "#+OPTIONS:" indicate the option section
+   "^:" for the option property name for subscript/supperscript
+   "nil" the value to nil
+
 ** Proper use of company mode's auto-completions
    When typing text, company mode would provide suggestions, use "TAB" key to cycle through the options.
 
