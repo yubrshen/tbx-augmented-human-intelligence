@@ -425,6 +425,13 @@ https://github.com/yubrshen/write-slides-with-jupyter
      #+END_SRC
      Ref: https://www.gnu.org/software/emacs/manual/html_node/efaq/Binding-keys-to-commands.html
 
+
+** Write special character/symbol in org-mode
+   Use command org-entities-help to find the org entity for the symbol, and
+   use {} to seperate the symbol from the rest of the normal character without space in between.
+
+   For example, =p\egrave{}re= for p\egrave{}re
+
 * Effective with web browsing
 
 ** Cycle through tabs in Chrome browser
