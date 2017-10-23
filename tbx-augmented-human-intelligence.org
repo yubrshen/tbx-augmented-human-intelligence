@@ -285,41 +285,87 @@ b: (Const): /job:localhost/replica:0/task:0/gpu:0
 a: (Const): /job:localhost/replica:0/task:0/gpu:0
 2017-08-08 10:27:53.629131: I tensorflow/core/common_runtime/simple_placer.cc:847] a: (Const)/job:localhost/replica:0/task:0/gpu:0
 
-* Shell script to add to a new github repository
+* Access github without username and password
 
-The following script perform the initial upload of a local repository to a newly created github repository.
-The resulted script is in "~/bin/add-new-repository"
+  The key is to define the remote origin in the fashion working with ssh.
+  One can follow this: [[https://gist.github.com/developius/c81f021eb5c5916013dc][Set up GitHub push with SSH keys]]
 
-The script's execution permission need to be changed after tangled.
+  The key is to have the following:
 
-#+BEGIN_SRC sh
-  chmod 704 ~/bin/add-new-repository
-#+END_SRC
+  git remote set-url origin git@github.com:username/your-repository.git
 
-The following is an example of the execution.
-#+BEGIN_SRC sh
-  add-new-repository write-slides-with-jupyter
-#+END_SRC
+  then one can do git pull and git push without being bothered by prompts of username and password.
 
-It must have one argument of the name of the repository.
+  However, once with ssh set up, actually even the correct username/password would not work, thus
+  one has to use ssh!
 
-#+NAME:add-new-repository
-#+BEGIN_SRC python :noweb yes :tangle ~/bin/add-new-repository :exports none
-  #!/home/yubrshen/miniconda3/bin/python
-  from subprocess import call
-  import sys
-  #git remote set-url origin git@github.com:yubrshen/write-slides-with-jupyter.git
-  #git remote add origin git@github.com:yubrshen/write-slides-with-jupyter.git
-  user_host = "git@github.com:yubrshen/"
-  url = user_host + sys.argv[1] + ".git"
-  #action = "set-url"
-  action = "add" # for initial setup origin url
-  call(["git", "remote", action, "origin", url])  # this works!
-  call(["git", "push", "origin", "master"])
-#+END_SRC
 
-Note: to have the command line arguments working, each parameter separated by space
-must be a separated element in the array.
+** Shell script to add to a new github repository
+
+ The following script performs the initial upload of a local repository to a newly created github repository.
+ The resulted script is in "~/bin/add-new-repository"
+
+ The script's execution permission need to be changed after tangled.
+
+ #+BEGIN_SRC sh
+   chmod 704 ~/bin/add-new-repository
+ #+END_SRC
+
+ The following is an example of the execution.
+ #+BEGIN_SRC sh
+   add-new-repository write-slides-with-jupyter
+ #+END_SRC
+
+ It must have one argument of the name of the repository.
+
+ #+NAME:add-new-repository
+ #+BEGIN_SRC python :noweb yes :tangle ~/bin/add-new-repository :exports none
+   #!/home/yubrshen/miniconda3/bin/python
+   from subprocess import call
+   import sys
+   #git remote set-url origin git@github.com:yubrshen/write-slides-with-jupyter.git
+   #git remote add origin git@github.com:yubrshen/write-slides-with-jupyter.git
+   user_host = "git@github.com:yubrshen/"
+   url = user_host + sys.argv[1] + ".git"
+   #action = "set-url"
+   action = "add" # for initial setup origin url
+   call(["git", "remote", action, "origin", url])  # this works!
+   call(["git", "push", "origin", "master"])
+ #+END_SRC
+
+ Note: to have the command line arguments working, each parameter separated by space
+ must be a separated element in the array.
+
+** Shell script to clone a repository with ssh setup
+ The following script performs git clone a repository but with ssh setup for the repository.
+ The resulted script is in "~/bin/git-clone-with-ssh"
+
+ The script's execution permission need to be changed after tangled.
+
+ #+BEGIN_SRC sh
+   chmod 704 ~/bin/git-clone-with-ssh
+ #+END_SRC
+
+ The following is an example of the execution.
+ #+BEGIN_SRC sh
+ git-clone-with-ssh https://github.com/yubrshen/CarND-Path-Planning-Project
+ #+END_SRC
+
+ It must have one argument of the name of the repository.
+
+ #+NAME:git-clone-with-ssh
+ #+BEGIN_SRC python :noweb yes :tangle ~/bin/git-clone-with-ssh :exports none
+   #!/home/yubrshen/miniconda3/bin/python
+   from subprocess import call
+   import sys
+   # git clone git://github.com/username/your-repository
+   repository = "git://github.com/yubrshen/" + sys.argv[1]
+   call(["git", "clone", repository])
+   user_host = "git@github.com:yubrshen/"
+   url = user_host + sys.argv[1] + ".git"
+   # git remote set-url origin git@github.com:username/your-repository.git
+   call(["git", "remote", "set-url", "origin", url])
+ #+END_SRC
 
 * Effective writing slides
 
@@ -425,12 +471,123 @@ https://github.com/yubrshen/write-slides-with-jupyter
      #+END_SRC
      Ref: https://www.gnu.org/software/emacs/manual/html_node/efaq/Binding-keys-to-commands.html
 
+** Insert figure into org file
+
+   Use the following code to insert a figure.
+
+#+BEGIN_EXAMPLE
+#+CAPTION: This is the caption for the next figure link (or table)
+#+NAME:   fig:SED-HR4049
+[[./img/a.jpg]]
+#+END_EXAMPLE
+
+Note the figure might be captured through screenshot!
+
+** Permanently, and globally change the margin of org export to PDF
+
+   (setq org-latex-packages-alist '(("margin=2cm" "geometry" nil)))
+   or
+   #+LATEX_HEADER: \usepackage[margin=0.5in]{geometry}
 
 ** Write special character/symbol in org-mode
    Use command org-entities-help to find the org entity for the symbol, and
    use {} to seperate the symbol from the rest of the normal character without space in between.
 
    For example, =p\egrave{}re= for p\egrave{}re
+
+** Insists on creating new file with helm
+
+   With helm, when accessing new file, if helm does not find any file with name containing the type substrings, then it will create one, no problem.
+
+   But when helm found existing file's name contains the typed as substrings, by default, it will open that the matched file. But one can insist on
+   creating the new file by selecting the selected file name by typing C-P, the one above the matched existing file name.
+
+** Retrieve last command executed
+
+last-command and this-command
+
+Normally, whenever a function is executed, Emacs
+sets the value of this-command to the function being executed.
+At the same time, Emacs sets the value of last-command to the previous value of this-command.
+
+** Debug in emacs
+   Use realgud (M-x realgud:pdb, etc. for different language's debugger)
+   With spacemacs, the keybindings of function keys are working
+   f9 set break point
+   mouse click on the beginning of the line where there is a breakpoint: clear the breakpoint
+   f10 next
+   f11, SPC, Step
+
+   f5: continue
+   S-F5: quit
+
+   Some keybindings may not work for spacemacs
+
+   One can also use the associated command buffer to control the debugger. Overall, it's better than using gdb, and gdbtui in Ubuntu.
+
+   https://github.com/realgud/realgud
+
+   As of 2017/9/6, realgud should replace my use of gdbtui on Ubuntu.
+
+
+
+** Mark and point
+
+   When not in transient-mark-mode, with C-x C-x, it's possible to jump between mark and point. It's quite handy
+   for situation when one pastes large chunks of text, and then would like to go back to the point at the beginning
+   of the pasting. Here are the procedure:
+   1. Pre-condition, transient-mark-mode disabled
+   2. Set mark at the point for pasting, before the pasting action
+   3. Perform the paste operation
+   4. Switch between point and mark by command C-x C-x
+
+*** How to disable transient-mark-mode
+
+    A few options:
+    - M-x transient-mark-mode to toggle the transient-mark-mode
+    - or execute (transient-mark-mode 0) in configuration
+
+*** Temporarily enable transient-mark-mode
+
+    By command C-u C-x C-x (in spacemacs, SPACE u C-x C-x, can temporarily enable the transient-mark-mode
+
+** Read and make notes with PDF: interleave
+
+   1. Create a new org file
+   2. In it, put the line
+#+INTERLEAVE_PDF: <path-to-the-pdf-file>
+
+then start to read PDF with command M-x interleave
+
+** Execute shell command and place output to replace the content of the region, in spacemacs
+
+   1. Select the region to be processed and replaced
+   2. SPACE u M-! <cmd>
+
+   SPACE u is for universal argument to replace the selected region.
+
+** Way to let Python live code work with particular environment:
+   start the environment in a shell, and start emacs from the shell
+
+
+** Indent-region: format a region to have proper indent
+   Select the region needing to reformat, then indent-region
+   C-M \
+
+** recursive grep in a directory
+
+   M-x rgrep
+
+   Alternatively, (not really explored, not needed beyond rgrep).
+
+Use helm-projectile-grep/ack/ag: You can search for everything starting from project root. Later if you want to save the search results, press F3 or press TAB to switch to action menu and select the 3rd action. To navigate hgrep buffer:
+C-<down>: go to next match and open the match.
+C-<up>: go to previous match and open the match.
+M-<down>: go to next match without opening the match.
+M-<up>: go to next match without opening the match.
+C-o: open current match in other window.
+RET: open current match in current window.
+Use helm-projectile-find-dir (note the helm prefix; you must use proper Helm commands from helm-projectile package in general): narrow to a desired directory and press C-u C-s to recursively search in that directory. If you don't press C-u, it just searches in that directory without going deeper.
 
 * Effective with web browsing
 
@@ -440,3 +597,337 @@ https://github.com/yubrshen/write-slides-with-jupyter
 
 ** Switch to previous tab in Chrome browser
    Allt+w (with a plugging installed)
+
+* Effective regular expression building and testing
+
+  Here is an effective tool to build and validate regular expression. Make sure to select Javascript (not Php) as language to be closer to C++, and others.
+
+
+* Build debug enabled executable from C++ source
+at the root of the project:
+
+cmake -DCMAKE_BUILD_TYPE=Debug build
+
+* Effective C++/C debug
+
+  As of 2017/9/6, see realgud entry: [[Debug in emacs]], as it's more user friendly than gdbtui.
+
+  Use gdbtui (GDB with GUI):
+  gdbtui <path-to-executable>
+
+  To enable cmake to setup for debug, use cmake-gui, select build type as Debug, then make on the command line.
+
+  Major command in GDB:
+  break <line number>
+  run to run the loaded program
+  continue to resume from breakpoint
+
+  display <variable-name> to auto show the value of the variable
+  print <variable-name> to show the value of the variable once; print *<pointer> (to show the data pointed by the pointer)
+
+  undisplay to remove all previously displayed variables.
+
+** Passing arguments and rediction from standard input still works inside gdbtui
+
+Pass the arguments to the run command from within gdb.
+
+$ gdb ./a.out
+(gdb) r arg1 arg2 < t
+Starting program: /dir/a.out < t
+
+** Typical workflow with GDB
+
+   1. Make
+   2. gdbtui <executable>
+   3. break <all interested line numbers>
+   4. r arg1 arg2 < <input_in_file>
+   5. examine at a breakpoint
+   6. continue, repeat step 5 (the previous)
+
+** Running C++ program interactive with emacs/ubuntu
+   There are a few options:
+   1. Use cpp.sh (a web site, paste code to the code window and run). Note: when there is some crash, it may not report the error, such as segmentation fault, etc.
+   2. Use my own sandbox mechanism of tangle to ~/programming/cplusplus/sandbox/src/sandbox.cpp and run in command shell (Note, the command to tangle in spacemacs is <SPACE> u C-v C-t t, not to confusing with u without <SPACE> which is undo!
+   3. Use emacs org-babel executing code block, see https://emacs.stackexchange.com/questions/15065/org-mode-babel-interactive-code-block-evaluation
+   4. Use Jupyter C++ kernel, see http://shuvomoy.github.io/blog/programming/2016/08/04/Cpp-kernel-for-Jupyter.html for leads
+
+** There is a way to construct vector literals in C++
+   For example,
+   vector<int> a_vector = {1, 2, 3} // This requires C++11
+    There might be way to use << operation, such as
+    vector<string> a_vector;
+    a_vector << "Hello" << "World"; // not verified.
+
+    Another to do it is via array initialization
+
+static const int arr[] = {16,2,77,29};
+vector<int> vec (arr, arr + sizeof(arr) / sizeof(arr[0]) );
+
+
+** It's complicated to find length of a C++ array, use vector instead
+
+   int a[7];
+   std::cout << "Length of array = " << (sizeof(a)/sizeof(*a)) << std::endl;
+
+** Use for (auto x:sequence) { <access code>}
+   To traverse the sequence, to avoid confusion and mistakes with iteration variable.
+
+** Use C++11 for new and improved expressiveness
+
+** With spacemacs, I found M-x gdb works for C++ debugging
+
+   - To set breakpoint C-x C-a C-b in a source code buffer
+   - To clear a breakpoint at the place of the breakpoint, C-x C-a C-d
+   - Restore multiple window layout:
+If you ever change the window layout, you can restore the many-windows layout by typing M-x gdb-restore-windows . To toggle between the many windows layout and a simple layout with just the GUD interaction buffer and a source file, type M-x gdb-many-windows .
+GDB User Interface Layout - GNU Emacs Manual - GNU.org
+https://www.gnu.org/software/emacs/manual/.../emacs/GDB-User-Interface-Layout.html
+
+- running again will automatically reload the updated binary.
+
+* Effective C++
+** object assignment need to have default constructor to work
+
+  For object assignment to work, the class for the object must have default constructor, taking no arugment.
+
+** C++ compiler can provide the copy constructor and assignment operator for call with pointer as member
+
+  Also note, for class without pointer as member, then the copy constructor, and assignment operator can be provided by
+  the compiler, no need to code manually, unless there is special requirements in the implementation.
+
+  While with class with pointer as member, then the copy constructor and assignment operator must be manually defined,
+  as it matters how "deep" the copy and assignment should be performed along the pointer.
+
+** #include <algorithm> needed for operator of vector of string
+   In the following code,
+vector.erase(std::remove(a_vector.begin(), a_vector.end(), value), a_vector.end());
+
+it needs to use the special string value comparison defined in algorithm to work.
+without including algorithm, it will use the default, causing the following error:
+
+#+BEGIN_QUOTE
+error: cannot convert ‘std::vector<std::__cxx11::basic_string<char> >::iterator {aka __gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char>*, std::vector<std::__cxx11::basic_string<char> > >}’
+to ‘const char*’ for argument ‘1’ to ‘int remove(const char*)’
+   a_vector.erase(std::remove(a_vector.begin(), a_vector.end(), value), a_vector.end());
+
+#+END_QUOTE
+
+without #include <algorithm>, it will also cause the following error:
+
+#+BEGIN_QUOTE
+In instantiation of
+‘typename T::iterator min_map_element(T&) [with T = std::map<std::__cxx11::basic_string<char>, float>; typename T::iterator = std::_Rb_tree_iterator<std::pair<const std::__cxx11::basic_string<char>, float> >]’:
+required from here
+error: ‘min_element’ was not declared in this scope
+   return min_element(m.begin(), m.end(),
+
+#+END_QUOTE
+
+** The lifetime of auto declaration variables (objects) is within the scope where it's declared
+   - auto declaration: such as int i;
+   - a pair of bracket define a scope
+   - a variable declared as auto variable would not have guarantee to exist outside of its declaring scope!
+
+   [[ihttps://stackoverflow.com/questions/11137516/scope-vs-lifetime-of-variabled:][Scope vs. Lifetime of Variable]]
+
+   Also note that Python's scope is much simpler and more generous: only function and global are scopes,
+   the other code block is not scope, thus has no impact to the lifetime of Python object
+
+** The lifetime of returned value
+   The return value from a function is temporary only guarantee to exist during the statement of calling the function.
+   Therefore the returned value should be assigned to an variable in order to extend or preserve the lifetime of the returned value.
+
+** Enable core dump generation in Ubuntu
+
+   On terminal to execute the following:
+#+BEGIN_SRC sh
+ulimit -c unlimited
+ #+END_SRC
+
+to have it permanent, put the command in ~/.profile
+
+** Investigation of core dump file
+
+   gdb <executable> ./core
+
+** To manipulate a vector as value keyed in a std::map
+
+   The address of the vector (pointer) instead of vector value must be used. Otherwise, it would not be the same vector, but a new instance
+   of empty vector.
+
+   Anything on the left hand-side or target of manipulation, must use pointer to the address, cannot be the value.
+
+   Note, to express a map from string to vector pointer should be as following:
+   map<string, vector<double>* > // not map<string, *vector<double> >
+
+
+* Effective Python
+
+** Use python-live-mode in emacs to visualize the execution
+
+   In the python-live-mode, all value assigned to a variable/label would be shown it's value at the moment of label reference.
+   It makes it quite clean of the program execution in terms of value changes.
+
+   python-live-mode can be started by keys 'l in python-mode in spacemacs.
+
+** Avoid the trap of Python variable assignment
+
+deepcopy needed to copy multi-dimension list,
+Python's variable is just a label to data value.
+For container type such as list, the assignment only adds one more label for the variable on the right side of assignment to the data value referred by the variable on the left side of the assignment!
+Thus modifying using the either label would cause the same data value (container) to be modified!
+
+The solution is use copy for one-dimensional list, or full list slicing [:]
+
+For multiple dimension list, one has to use deepcopy to make actual data duplication.
+
+It helps to refresh to the understanding of label semantics of Python variable:  http://python.net/~goodger/projects/pycon/2007/idiomatic/handout.html#python-has-names
+
+Here is examples to illustrate the problems and solutions:
+
+In the examples, I assume using python live-mode in emacs to visualize the exectution result.
+
+#+NAME:assignment-semantics
+#+BEGIN_SRC python :noweb yes :tangle :exports none
+  # Scalar assignment, the assignment has copy semantics
+  x = 1  # value 1 has a label x
+  y = x  # value 1 has another label y
+  y = y -1                        # the value referred by y has changed, subtracted by 1,
+  # it's a different value, no longer the same value as the one referred by x and y before.
+  # x still refers to the previous value
+  z = x
+  w = y                           # now y refers to a new value
+
+  # array, one dimension, assignment has no copy semantics:
+
+  x_array = [1, 2, 3]
+  y_array = x_array
+  y_array[0] = -1
+  z = x_array                     # The array value referred by x_array is also modified in the same way
+
+  # use list.copy for one dimension array to implement the copy semantics:
+
+  x_array = [1, 2, 3]             # the array [1, 2, 3] has a label x_array
+  y_array = x_array.copy()        # y_array refers to a new list, one dimensional copied from x_array, one dimensional
+  y_array[0] = -1                 # using the label, y_array, modify the value's element
+  z = x_array                     # I expect that value referred by x_array name would not be modified,
+  # as y_array now refers to a different value.
+  w = y_array                     # I expect the value referred by y_array name have the value modified
+
+  # For one dimensional list, use full extent list slicing would work as well as list.copy():
+  x_array = [1, 2, 3]
+  y_array = x_array[:]
+  y_array[0] = -1
+  z = x_array
+
+  # array, two dimensions, assignment has no copy semantics
+
+  x_array_array = [[1, 2, 3], [3, 2, 1]]
+  y_array_array = x_array_array
+  y_array_array[0][0] = -1
+  z = x_array_array               # the two-dimensional array value referred by x_array has been modified
+  w = y_array_array
+
+  # Try list.copy() for two dimensions array: (it has no real copy semantics, as it's just a shallow copy)
+
+  x_array_array = [[1, 2, 3], [3, 2, 1]]
+  y_array_array = x_array_array.copy()
+  y_array_array[0][0] = -1
+  z = x_array_array
+  w = y_array_array
+
+  #For multi-dimensions, deepcopy from copy module must be used to work :
+  from copy import deepcopy
+  x_array_array = [[1, 2, 3], [3, 2, 1]]
+  y_array_array = deepcopy(x_array_array)
+  y_array_array[0][0] = -1
+  print(x_array_array)
+  print(y_array_array)
+
+  # For 2-D list, using explicit slicing would be faster than deepcopy:
+  x_array_array = [[1, 2, 3], [3, 2, 1]]
+  y_array_array = [row[:] for row in x_array_array]
+  y_array_array[0][0] = -1
+  print(x_array_array)
+  print(y_array_array)
+
+
+
+  grid = [[0, 0],
+          [1, 0]]
+
+  a_copy = deepcopy(grid)
+
+  for x in range(len(a_copy)):
+    for y in range(len(a_copy[0])):
+      a_copy[x][y] = -1
+
+  x = grid
+#+END_SRC
+
+The moral of the story, in Python, assignment never makes a copy of the value referred by the name.
+To copy, the action must be explicit.
+
+#+RESULTS: assignment-semantics
+: None
+
+** The concept of variable/label scope in Python
+
+   Only function introduces new scope besides the global scope at the module/file level (variable/label assignment)
+
+   The other code block of if, for, etc. does not introduce new scope. The scope would be the same as the enclosing scope.
+   This seems simpler and different from C++, or Scala, even Clojure!
+
+** List comprehension is functional, only provide values, but does not provide the modification side effect!
+
+   It's not possible to modify element in list comprehension, as illustrated by the following example:
+
+#+NAME:verify-modification-by-list-comprehension
+#+BEGIN_SRC python :noweb yes :tangle :exports none
+  expand = [1, 2, 3]
+
+  for cell in expand:
+      cell = cell * 2
+
+  x = expand
+
+  new_expand = [-1 for cell in expand]
+
+#+END_SRC
+
+In this example, expand was not modified. The first list comprehension, only produces the values of the doubles of the elements of expand.
+But it does not change the elements of expand.
+
+However, it's possible to use list comprehension to construct new value as the second list comprehension shows.
+new_expand will have the same dimensions but all value would be -1.
+
+** Debug Python code with pdb.set_trace()
+
+   import pdb
+
+   pdb.set_trace() // set break point at the location, when the program reach this location, it will enter debugger, then one can do the debug there.
+
+* Effective use of HackerRank drill page
+
+1. Copy the description to my editor to help to parse and understanding
+2. Code the required in emacs babel buffer
+3. Paste the coded code to HackerRank's window for the code segment
+4. Excute "Run Code" in HackerRank (as it provides better error visualization)
+5. Fix the code in my own buffer of emacs, repaste
+6. When passing the "Run Code", submit
+7. If there is any failed case, download the test case.
+8. Paste the input to the custom input, while the expected output to emacs's scrath buffer
+9. Run Code to find out the difference between the output  and the expected
+10. Only as last resort, copy all the code including main to emacs buffer and run the tests locally.
+
+* Effective in programming
+
+** How to read program effectively?
+
+   - Start with the first entry of the program, follow through the implementation of the top level functions in the entry implementation
+
+   - Follow along the paths of the implementation until comfortable to comprehension.
+
+   - This may ignore all the other code not along the main call paths
+
+   - Make notes of the domain model of the program while tracking the code paths
