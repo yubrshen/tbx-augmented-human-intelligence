@@ -23,573 +23,828 @@ With these personal toolboxes, the API surface can be focused and limited to sui
 I may use the Google's python-fire (https://github.com/google/python-fire)
 to ease the workload to convert python libraries into command line tools.
 
-* File handling
 
-This group should complement shutil and pathlib of Python. (shutil is of higher level than os package. pathlib is an object oriented for Path concept.)
 
-With pathlib, mkdir_if_not can be directly implemented. This may be revisited to use pathlib.
 
-#+NAME:mkdir_pathlib
-#+BEGIN_SRC python :noweb yes :tangle :exports none
+* Unsolved problems
 
-  Path.mkdir(mode=0o777, parents=False, exist_ok=False)
+Here are records of unresolved problems, to save repeating effort.
 
-      Create a new directory at this given path. If mode is given, it is combined with the process’ umask value to determine the file mode and access flags. If the path already exists, FileExistsError is raised.
+** How to keep my notes easier to search over my whole computer?
 
-      If parents is true, any missing parents of this path are created as needed; they are created with the default permissions without taking mode into account (mimicking the POSIX mkdir -p command).
+I have lots of notes scatter in Freeplane files, org files, etc. I'd like to be able to search them for key words.
+For examples, I'd like to know the notes about "TensorFlow" in all my files.
 
-      If parents is false (the default), a missing parent raises FileNotFoundError.
+** Not able to view *.mov file on Ubuntu with VLC and totem
 
-      If exist_ok is false (the default), FileExistsError is raised if the target directory already exists.
-
-      If exist_ok is true, FileExistsError exceptions will be ignored (same behavior as the POSIX mkdir -p command), but only if the last path component is not an existing non-directory file.
-
-      Changed in version 3.5: The exist_ok parameter was added.
-
-#+END_SRC
-
-Also pathlib provides touch function.
-#+NAME:touch_pathlib
-#+BEGIN_SRC python :noweb yes :tangle :exports none
-  from pathlib import Path
-
-  Path('path/to/file.txt').touch()
-#+END_SRC
-
-I should always do expand user (~) for pathname to be sure that they are absolute path to avoid trouble down the road of further processing in all my libraries.
-
-** Preamble
-
-   Import etc.
-
-   #+NAME:preamble_file
-   #+BEGIN_SRC python :noweb yes :tangle ./src/python3/fileTbx.py :exports none
-     import os, shutil
-   #+END_SRC
-
-** mkdir_if_not
-
-   Make directory specified if it does not exist.
-   It returns the tuple of path of the directory and the boolean wthether the directory exists (should by true).
-   It handles the exception that the directory might be created after checking its existence.
-
- #+NAME:mkdir_if_not
- #+BEGIN_SRC python :noweb yes :tangle ./src/python3/fileTbx.py :exports none
-  def mkdir_if_not(path):
-      path = os.path.expanduser(path)
-      if not os.path.exists(path):
-          import errno
-          try: # use try to avoid repeated creating the directory, if it's created after the above checking
-              os.makedirs(path)
-          except OSError as e:
-              if e.errno != errno.EEXIST:
-                  raise
-      return path, os.path.exists(path)
-#+END_SRC
-
-** unzip
-
-   unzip a file specified by file_zipped to the directory specified by target_path,
-   making sure the target_path do exist.
-
-#+NAME:unzip
-#+BEGIN_SRC python :noweb yes :tangle ./src/python3/fileTbx.py :exports none
-  def unzip(file_zipped, target_path):
-      target_path = os.path.expanduser(target_path)
-      mkdir_if_not(target_path)
-      import zipfile
-      with zipfile.Zip2017-08-08 10:27:53.180144: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.1 instructions, but these are available on your machine and could speed up CPU computations.
-2017-08-08 10:27:53.180170: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.2 instructions, but these are available on your machine and could speed up CPU computations.
-2017-08-08 10:27:53.180176: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
-2017-08-08 10:27:53.180181: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
-2017-08-08 10:27:53.180185: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use FMA instructions, but these are available on your machine and could speed up CPU computations.
-2017-08-08 10:27:53.528010: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:893] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
-2017-08-08 10:27:53.528649: I tensorflow/core/common_runtime/gpu/gpu_device.cc:940] Found device 0 with properties:
-name: GeForce GTX 1070
-major: 6 minor: 1 memoryClockRate (GHz) 1.645
-pciBusID 0000:01:00.0
-Total memory: 7.92GiB
-Free memory: 7.32GiB
-2017-08-08 10:27:53.528682: I tensorflow/core/common_runtime/gpu/gpu_device.cc:961] DMA: 0
-2017-08-08 10:27:53.528692: I tensorflow/core/common_runtime/gpu/gpu_device.cc:971] 0:   Y
-2017-08-08 10:27:53.528713: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1030] Creating TensorFlow device (/gpu:0) -> (device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0)
-Device mapping:
-/job:localhost/replica:0/task:0/gpu:0 -> device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0
-2017-08-08 10:27:53.609874: I tensorflow/core/common_runtime/direct_session.cc:265] Device mapping:
-/job:localhost/replica:0/task:0/gpu:0 -> device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0
-
-MatMul: (MatMul): /job:localhost/replica:0/task:0/gpu:0
-2017-08-08 10:27:53.629104: I tensorflow/core/common_runtime/simple_placer.cc:847] MatMul: (MatMul)/job:localhost/replica:0/task:0/gpu:0
-b: (Const): /job:localhost/replica:0/task:0/gpu:0
-2017-08-08 10:27:53.629124: I tensorflow/core/common_runtime/simple_placer.cc:847] b: (Const)/job:localhost/replica:0/task:0/gpu:0
-a: (Const): /job:localhost/replica:0/task:0/gpu:0
-2017-08-08 10:27:53.629131: I tensorflow/core/common_runtime/simple_placer.cc:847] a: (Const)/job:localhost/replica:0/task:0/gpu:0
-File(file_zipped, 'r') as zip_ref:
-          zip_ref.extractall(target_path)
-#+END_SRC
-
-** random_file_name
-
-   Generate a random file name with suffix as parameter.
-
-#+NAME:random_file_name
-#+BEGIN_SRC python :noweb yes :tangle :exports none
-  import random, string, os
-
-  def random_file_name(suffix, length=10):
-      return ''.join(random.choice(string.lowercase) for i in range(length)) + '.' + suffix
-
-#+END_SRC
-
-#+NAME:random_file_name_test
-#+BEGIN_SRC python :noweb yes :tangle :exports none
-  file_name = random_file_name('txt')
-
-  status = os.path.exists(file_name)
-
-  def touch_old(fname, times=None):
-      with open(fname, "a"):
-          os.utime(fname, times)
-
-  status = os.getcwd()
-  import pathlib
-  pathlib.Path(file_name).touch()
-  status = os.path.exists(file_name)
-
-
-#+END_SRC
-
-* Pre-processing for machine learning
-
-** prepare_training_samples
-
-   Move the samples in path according to their categories into their corresponding directories named by their categories.
-   This is a convention in Keras deep learning.
-
-   The determination of the category for a sample (file) is determined by the function category_f.
-   It should raise ValueError exception if there is no category can be found for the sample.
-   If there is no category found for a sample (file), then do nothing against (pass).
-
-   #+NAME:prepare_training_samples
-   #+BEGIN_SRC python :noweb yes :tangle ./src/python3/preProcessingML.py :exports none
-     def prepare_training_samples(path, category_f):
-         path = os.path.expanduser(path)
-
-         for f in os.listdir(path):
-             try:
-                 category_gory_dir = path + category_f(f) + '/'
-                 mkdir_if_not(category_dir)
-                 shutil.move(path + f, category_dir)
-             except ValueError as e:
-                 pass
-   #+END_SRC
-   Use shutil.move is considered more higher level than os.rename.
-
-*** category_f
-
-    Categorize the training data for you to file of a training center computer category based on the computer depository make directory if needed then move that piece of data into that corrupt responding categories I can generalize the function of category for a training file (image)
-
-    An instance of category_f to determine the category of a file,
-    by the first segment of the proper file name (the segments are separated by dot '.'.
-
-    #+NAME:category_f_by_name
-    #+BEGIN_SRC python :noweb yes :tangle ./src/python3/preProcessingML.py :exports none
-      def category_f(file_name):
-          file_name = os.path.basename(file_name)
-          proper_name = os.path.splitext(file_name)[0]
-          return proper_name[:proper_name.index('.')]
-    #+END_SRC
-
-** Randomly select a sublist
-
-#+NAME:random_sublist
-#+BEGIN_SRC python :noweb yes :tangle ./src/python3/preProcessingML.py :exports none
-  lst = [1, 2, 3, 4, 5, 6]
-  def random_split(lst, x):
-      import random
-      random.shuffle(lst)
-
-      return lst[:x], lst[x:]
-
-  train, valid = random_split(lst, 2)
-
-#+END_SRC
-
-** validation_split
-
-#+NAME:validation_split
-#+BEGIN_SRC python :noweb yes :tangle ./src/python3/preProcessingML.py :exports none
-  def validation_split(train_dir, valid_dir=None, valid_percentage=0.01):
-      """
-      Splitting from training set samples for validation.
-      The training samples are in train_dir.
-      The validation samples should be in valid_dir.
-      The valid_percentage is the percentage of the training set to be validation.
-
-      It is assumed that train_dir have samples organized into subdirectories named by categories.
-      """
-      from pathlib import Path, PurePosixPath
-      import os, shutil
-      valid_dir = valid_dir or PurePosixPath(train_dir).parent.joinpath('valid').as_posix()
-      pathlib.Path(valid_dir).mkdir(exist_ok=True)
-      for d in os.listdir(train_dir):
-          lst = os.listdir(train_dir+d)
-          valid_len = int(len(lst)*valid_percentage)
-          valid_lst, _ = random_split(lst, valid_len)
-          p_valid_sub = valid_dir+d
-          pathlib.Path(p_valid_sub).mkdir(exist_ok=True)
-          for f in valid_lst:
-              shutil.move(train_dir+d+'/'+f, p_valid_sub)
-#+END_SRC
-
-* Confirmation of GPU working with TensorFlow
-
-#+NAME:if-GPU-works
-#+BEGIN_SRC python :noweb yes :tangle :exports none
-  import tensorflow as tf
-  with tf.device('/gpu:0'):
-      a = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[2, 3], name='a')
-      b = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[3, 2], name='b')
-      c = tf.matmul(a, b)
-
-  with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
-      print (sess.run(c))
-#+END_SRC
-
-Below output from the shell console where jupyter notebook server is run shows that GPU with TensorFlow is working:
-
-2017-08-08 10:27:53.180144: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.1 instructions, but these are available on your machine and could speed up CPU computations.
-2017-08-08 10:27:53.180170: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.2 instructions, but these are available on your machine and could speed up CPU computations.
-2017-08-08 10:27:53.180176: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
-2017-08-08 10:27:53.180181: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
-2017-08-08 10:27:53.180185: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use FMA instructions, but these are available on your machine and could speed up CPU computations.
-2017-08-08 10:27:53.528010: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:893] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
-2017-08-08 10:27:53.528649: I tensorflow/core/common_runtime/gpu/gpu_device.cc:940] Found device 0 with properties:
-name: GeForce GTX 1070
-major: 6 minor: 1 memoryClockRate (GHz) 1.645
-pciBusID 0000:01:00.0
-Total memory: 7.92GiB
-Free memory: 7.32GiB
-2017-08-08 10:27:53.528682: I tensorflow/core/common_runtime/gpu/gpu_device.cc:961] DMA: 0
-2017-08-08 10:27:53.528692: I tensorflow/core/common_runtime/gpu/gpu_device.cc:971] 0:   Y
-2017-08-08 10:27:53.528713: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1030] Creating TensorFlow device (/gpu:0) -> (device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0)
-Device mapping:
-/job:localhost/replica:0/task:0/gpu:0 -> device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0
-2017-08-08 10:27:53.609874: I tensorflow/core/common_runtime/direct_session.cc:265] Device mapping:
-/job:localhost/replica:0/task:0/gpu:0 -> device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0
-
-MatMul: (MatMul): /job:localhost/replica:0/task:0/gpu:0
-2017-08-08 10:27:53.629104: I tensorflow/core/common_runtime/simple_placer.cc:847] MatMul: (MatMul)/job:localhost/replica:0/task:0/gpu:0
-b: (Const): /job:localhost/replica:0/task:0/gpu:0
-2017-08-08 10:27:53.629124: I tensorflow/core/common_runtime/simple_placer.cc:847] b: (Const)/job:localhost/replica:0/task:0/gpu:0
-a: (Const): /job:localhost/replica:0/task:0/gpu:0
-2017-08-08 10:27:53.629131: I tensorflow/core/common_runtime/simple_placer.cc:847] a: (Const)/job:localhost/replica:0/task:0/gpu:0
-
-* Access github without username and password
-
-  The key is to define the remote origin in the fashion working with ssh.
-  One can follow this: [[https://gist.github.com/developius/c81f021eb5c5916013dc][Set up GitHub push with SSH keys]]
-
-  The key is to have the following:
-
-  git remote set-url origin git@github.com:username/your-repository.git
-
-  then one can do git pull and git push without being bothered by prompts of username and password.
-
-  However, once with ssh set up, actually even the correct username/password would not work, thus
-  one has to use ssh!
-
-
-** Shell script to add to a new github repository
-
- The following script performs the initial upload of a local repository to a newly created github repository.
- The resulted script is in "~/bin/add-new-repository"
-
- The script's execution permission need to be changed after tangled.
-
- #+BEGIN_SRC sh
-   chmod 704 ~/bin/add-new-repository
- #+END_SRC
-
- The following is an example of the execution.
- #+BEGIN_SRC sh
-   add-new-repository write-slides-with-jupyter
- #+END_SRC
-
- It must have one argument of the name of the repository.
-
- #+NAME:add-new-repository
- #+BEGIN_SRC python :noweb yes :tangle ~/bin/add-new-repository :exports none
-   #!/home/yubrshen/miniconda3/bin/python
-   from subprocess import call
-   import sys
-   #git remote set-url origin git@github.com:yubrshen/write-slides-with-jupyter.git
-   #git remote add origin git@github.com:yubrshen/write-slides-with-jupyter.git
-   user_host = "git@github.com:yubrshen/"
-   url = user_host + sys.argv[1] + ".git"
-   #action = "set-url"
-   action = "add" # for initial setup origin url
-   call(["git", "remote", action, "origin", url])  # this works!
-   call(["git", "push", "origin", "master"])
- #+END_SRC
-
- Note: to have the command line arguments working, each parameter separated by space
- must be a separated element in the array.
-
-** Shell script to clone a repository with ssh setup
- The following script performs git clone a repository but with ssh setup for the repository.
- The resulted script is in "~/bin/git-clone-with-ssh"
-
- The script's execution permission need to be changed after tangled.
-
- #+BEGIN_SRC sh
-   chmod 704 ~/bin/git-clone-with-ssh
- #+END_SRC
-
- The following is an example of the execution.
- #+BEGIN_SRC sh
- git-clone-with-ssh https://github.com/yubrshen/CarND-Path-Planning-Project
- #+END_SRC
-
- It must have one argument of the name of the repository.
-
- #+NAME:git-clone-with-ssh
- #+BEGIN_SRC python :noweb yes :tangle ~/bin/git-clone-with-ssh :exports none
-   #!/home/yubrshen/miniconda3/bin/python
-   from subprocess import call
-   import sys
-   # git clone git://github.com/username/your-repository
-   repository = "git://github.com/yubrshen/" + sys.argv[1]
-   call(["git", "clone", repository])
-   user_host = "git@github.com:yubrshen/"
-   url = user_host + sys.argv[1] + ".git"
-   # git remote set-url origin git@github.com:username/your-repository.git
-   call(["git", "remote", "set-url", "origin", url])
- #+END_SRC
-
-* Effective writing slides
-
-As of Aug., 2017, my choice of slide writing is jupyter notebook with reveal.js,
-for details, here is the tutorial on how to get started quickly.
-
-https://github.com/yubrshen/write-slides-with-jupyter
-
-* Effective with Emacs
-
-** Disable undersore-to-subscript in org-mode export
-   Have the option in the org-mode file:
-   #+OPTIONS: ^:nil
-
-   ref: https://stackoverflow.com/questions/698562/disabling-underscore-to-subscript-in-emacs-org-mode-export
-** Understanding of org-mode's option syntax
-
-   #+OPTIONS: ^:nil
-
-   "#+OPTIONS:" indicate the option section
-   "^:" for the option property name for subscript/supperscript
-   "nil" the value to nil
-
-** Proper use of company mode's auto-completions
-   When typing text, company mode would provide suggestions, use "TAB" key to cycle through the options.
-
-   This is the most effective way. My former way of use "Alt-n" is too cumbersome.
-
-** Using CDLaTeX to enter math in org-mode
-
-   1. In org-mode, many latex environment delimiters are recognized, and treated the text following the delimiters as latex-environment. The delimiters include
-      1. Environments of any kind. The only requirement is that the \begin statement appears on a new line, at the beginning of the line or after whitespaces only.
-      2. Text within the usual LaTeX math delimiters.
-         To avoid conflicts with currency specifications,
-         single ‘$’ characters are only recognized as math delimiters if the enclosed text contains at most two line breaks,
-         is directly attached to the ‘$’ characters with no whitespace in between, and
-         if the closing ‘$’ is followed by whitespace or punctuation
-         (parentheses and quotes are considered to be punctuation in this context).
-         For the other delimiters, there is no such restriction, so when in doubt, use ‘\(...\)’ as inline math delimiters.
-   http://orgmode.org/manual/LaTeX-fragments.html#LaTeX-fragments
-
-   2. In the latex-environment, cdlatex minor mode can be used, by: (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
-      1. Environment templates can be inserted with C-c {.
-
-      2. The <TAB> key will do template expansion if the cursor is inside a LaTeX fragment1.
-      For example, <TAB> will expand fr to \frac{}{} and position the cursor correctly inside the first brace.
-      Another <TAB> will get you into the second brace.
-      Even outside fragments, <TAB> will expand environment abbreviations at the beginning of a line.
-      For example, if you write ‘equ’ at the beginning of a line and press <TAB>,
-      this abbreviation will be expanded to an equation environment.
-      To get a list of all abbreviations, type M-x cdlatex-command-help RET.
-
-      1. Pressing _ and ^ inside a LaTeX fragment will insert these characters together with a pair of braces.
-      If you use <TAB> to move out of the braces, and if the braces surround only a single character or macro,
-      they are removed again (depending on the variable cdlatex-simplify-sub-super-scripts).
-
-      1. Pressing the grave accent ` followed by a character inserts math macros,
-      also outside LaTeX fragments. If you wait more than 1.5 seconds after the grave accent, a help window will pop up.
-
-      1. Pressing the apostrophe ' followed by another character modifies the symbol before point with an accent or a font.
-      If you wait more than 1.5 seconds after the apostrophe, a help window will pop up.
-      Character modification will work only inside LaTeX fragments; outside the quote is normal.
-      http://orgmode.org/manual/CDLaTeX-mode.html#CDLaTeX-mode
-
-** Effective navigation
-   http://ergoemacs.org/emacs/emacs_navigate_lisp_code.html
-*** Jump to the enclosing form or function in emacs-lisp code
-    - Use backward-up-list Ctrl-Alt + u Move to parent (move to the (beginning of) outer paren pair)
-*** Move to the first child
-    - down-list
-
-*** Move to next sibling
-    - forward-sexp
-*** Move to previous sibling
-    - backward-sexp
-
-** Define an emacs lisp function and bind it to a key in a major mode (work-flow)
-   1. Define the function: the crucial factor is to call (interactive) at the beginning of the function body.
-      For example,
-      #+NAME:
-      #+BEGIN_SRC emacs-lisp
-        (defun my-try-cdlatex-tab ()
-          "Call org-try-cdlatex-tab interactively"
-          (interactive)
-          (org-try-cdlatex-tab))
-      #+END_SRC
-
-   2. Bind the function to a key binding in the designated major mode, manually
-      To bind a key just in the current major mode, type M-x local-set-key <RET> key cmd <RET>.
-      To bind a key to globally, type M-x global-set-key <RET> key cmd <RET>
-
-   3. Recover the key binding code and put them into code file
-      To make the process of binding keys interactively easier, use the following “trick”: First bind the key interactively, then
-      immediately type C-x <ESC> <ESC> C-a C-k C-g. Now, the command needed to bind the key is in the kill ring, and can be yanked into your file
-
-   4. Embed the code of local-set-key into the designated major mode hook, e.g.
-
-     #+NAME:
-     #+BEGIN_SRC emacs-lisp
-       (add-hook 'org-mode-hook
-                 (lambda ()
-                   (local-set-key [C-S-iso-lefttab] (quote my-try-cdlatex-tab))))
-     #+END_SRC
-     Ref: https://www.gnu.org/software/emacs/manual/html_node/efaq/Binding-keys-to-commands.html
-
-** Insert figure into org file
-
-   Use the following code to insert a figure.
-
+For VLC, here is the error message:
+as of[2017-11-21 Tue 09:59]
 #+BEGIN_EXAMPLE
-#+CAPTION: This is the caption for the next figure link (or table)
-#+NAME:   fig:SED-HR4049
-[[./img/a.jpg]]
+  Failed to open VDPAU backend libvdpau_nvidia.so: cannot open shared object file: No such file or directory
 #+END_EXAMPLE
 
-Note the figure might be captured through screenshot!
+Following the suggestion from https://askubuntu.com/questions/13487/gnome-mplayer-failed-to-open-vdpau-backend-libvdpau-nvidia-so-error
+did not work, as it suggested to add:
 
-** Permanently, and globally change the margin of org export to PDF
+The following with sudo would not evaluate with C-c C-c
+#+BEGIN_SRC shell
+  sudo ln -s /usr/lib/vdpau/libvdpau_nvidia.so.1 /usr/lib/libvdpau_nvidia.so
+#+END_SRC
 
-   (setq org-latex-packages-alist '(("margin=2cm" "geometry" nil)))
-   or
-   #+LATEX_HEADER: \usepackage[margin=0.5in]{geometry}
+#+RESULTS:
+: 1
 
-** Write special character/symbol in org-mode
-   Use command org-entities-help to find the org entity for the symbol, and
-   use {} to seperate the symbol from the rest of the normal character without space in between.
+The following is the way to execute commands with sudo in babel:
+#+NAME:
+#+BEGIN_SRC emacs-lisp
+  (let ((default-directory "/sudo::"))
+    (shell-command "ln -s /usr/lib/vdpau/libvdpau_nvidia.so.1 /usr/lib/libvdpau_nvidia.so"))
+#+END_SRC
 
-   For example, =p\egrave{}re= for p\egrave{}re
+But I checked the file/link has aleardy existed:
 
-** Insists on creating new file with helm
+#+BEGIN_SRC shell
+  ls -lt /usr/lib/vdpau/libvdpau_nvidia.so.1
+#+END_SRC
 
-   With helm, when accessing new file, if helm does not find any file with name containing the type substrings, then it will create one, no problem.
+#+RESULTS:
+: lrwxrwxrwx 1 root root 55 Nov  4 12:59 /usr/lib/vdpau/libvdpau_nvidia.so.1 -> /etc/alternatives/x86_64-linux-gnu_libvdpau_nvidia.so.1
 
-   But when helm found existing file's name contains the typed as substrings, by default, it will open that the matched file. But one can insist on
-   creating the new file by selecting the selected file name by typing C-P, the one above the matched existing file name.
+I chased the symbolic link:
 
-** Retrieve last command executed
+#+BEGIN_SRC shell
+ls -lt /etc/alternatives/x86_64-linux-gnu_libvdpau_nvidia.so.1
+ls -lt /usr/lib/nvidia-384/vdpau/libvdpau_nvidia.so.1
+#+END_SRC
 
-last-command and this-command
+#+RESULTS:
+| lrwxrwxrwx | 1 | root | root | 46 | Nov | 4 | 12:59 | /etc/alternatives/x86_64-linux-gnu_libvdpau_nvidia.so.1 | -> | /usr/lib/nvidia-384/vdpau/libvdpau_nvidia.so.1 |
+| lrwxrwxrwx | 1 | root | root | 25 | Nov | 2 | 12:42 | /usr/lib/nvidia-384/vdpau/libvdpau_nvidia.so.1          | -> | libvdpau_nvidia.so.384.98                      |
 
-Normally, whenever a function is executed, Emacs
-sets the value of this-command to the function being executed.
-At the same time, Emacs sets the value of last-command to the previous value of this-command.
+#+BEGIN_SRC shell
+ls -lt /usr/lib/nvidia-384/vdpau/libvdpau_nvidia.so.384.98
+#+END_SRC
 
-** Debug in emacs
-   Use realgud (M-x realgud:pdb, etc. for different language's debugger)
-   With spacemacs, the keybindings of function keys are working
-   f9 set break point
-   mouse click on the beginning of the line where there is a breakpoint: clear the breakpoint
-   f10 next
-   f11, SPC, Step
+#+RESULTS:
+: -rw-r--r-- 1 root root 888288 Oct 26 14:40 /usr/lib/nvidia-384/vdpau/libvdpau_nvidia.so.384.98
 
-   f5: continue
-   S-F5: quit
+so at the end of the symbolic link, the target file did exist!
 
-   Some keybindings may not work for spacemacs
+But vlc still complainted.
 
-   One can also use the associated command buffer to control the debugger. Overall, it's better than using gdb, and gdbtui in Ubuntu.
+The problem with totem is simply just crash.
 
-   https://github.com/realgud/realgud
+The alternative of using mplayer to view the same file worked. So the case is closed for now,[2017-11-21 Tue 10:23]
 
-   As of 2017/9/6, realgud should replace my use of gdbtui on Ubuntu.
+@ bash: the last argument of the previous command !$
+
+#+BEGIN_SRC shell
+#!/usr/bash
+echo "Hello"
+echo !$
+#+END_SRC
+
+#+RESULTS:
+| Hello |
+| !$    |
+
+* Handy Machine Learning and Data Science
+** Pre-processing for machine learning
+
+*** prepare_training_samples
+
+    Move the samples in path according to their categories into their corresponding directories named by their categories.
+    This is a convention in Keras deep learning.
+
+    The determination of the category for a sample (file) is determined by the function category_f.
+    It should raise ValueError exception if there is no category can be found for the sample.
+    If there is no category found for a sample (file), then do nothing against (pass).
+
+    #+NAME:prepare_training_samples
+    #+BEGIN_SRC python :noweb yes :tangle ./src/python3/preProcessingML.py :exports none
+      def prepare_training_samples(path, category_f):
+          path = os.path.expanduser(path)
+
+          for f in os.listdir(path):
+              try:
+                  category_gory_dir = path + category_f(f) + '/'
+                  mkdir_if_not(category_dir)
+                  shutil.move(path + f, category_dir)
+              except ValueError as e:
+                  pass
+    #+END_SRC
+    Use shutil.move is considered more higher level than os.rename.
+
+**** category_f
+
+     Categorize the training data for you to file of a training center computer category based on the computer depository make directory if needed then move that piece of data into that corrupt responding categories I can generalize the function of category for a training file (image)
+
+     An instance of category_f to determine the category of a file,
+     by the first segment of the proper file name (the segments are separated by dot '.'.
+
+     #+NAME:category_f_by_name
+     #+BEGIN_SRC python :noweb yes :tangle ./src/python3/preProcessingML.py :exports none
+       def category_f(file_name):
+           file_name = os.path.basename(file_name)
+           proper_name = os.path.splitext(file_name)[0]
+           return proper_name[:proper_name.index('.')]
+     #+END_SRC
+
+*** Randomly select a sublist
+
+ #+NAME:random_sublist
+ #+BEGIN_SRC python :noweb yes :tangle ./src/python3/preProcessingML.py :exports none
+   lst = [1, 2, 3, 4, 5, 6]
+   def random_split(lst, x):
+       import random
+       random.shuffle(lst)
+
+       return lst[:x], lst[x:]
+
+   train, valid = random_split(lst, 2)
+
+ #+END_SRC
+
+*** validation_split
+
+ #+NAME:validation_split
+ #+BEGIN_SRC python :noweb yes :tangle ./src/python3/preProcessingML.py :exports none
+   def validation_split(train_dir, valid_dir=None, valid_percentage=0.01):
+       """
+       Splitting from training set samples for validation.
+       The training samples are in train_dir.
+       The validation samples should be in valid_dir.
+       The valid_percentage is the percentage of the training set to be validation.
+
+       It is assumed that train_dir have samples organized into subdirectories named by categories.
+       """
+       from pathlib import Path, PurePosixPath
+       import os, shutil
+       valid_dir = valid_dir or PurePosixPath(train_dir).parent.joinpath('valid').as_posix()
+       pathlib.Path(valid_dir).mkdir(exist_ok=True)
+       for d in os.listdir(train_dir):
+           lst = os.listdir(train_dir+d)
+           valid_len = int(len(lst)*valid_percentage)
+           valid_lst, _ = random_split(lst, valid_len)
+           p_valid_sub = valid_dir+d
+           pathlib.Path(p_valid_sub).mkdir(exist_ok=True)
+           for f in valid_lst:
+               shutil.move(train_dir+d+'/'+f, p_valid_sub)
+ #+END_SRC
+
+** Confirmation of GPU working with TensorFlow
+
+ #+NAME:if-GPU-works
+ #+BEGIN_SRC python :noweb yes :tangle ~/tmp/verify_gpu_tensorflow.py :exports none
+   import tensorflow as tf
+   with tf.device('/gpu:0'):
+       a = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[2, 3], name='a')
+       b = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[3, 2], name='b')
+       c = tf.matmul(a, b)
+
+   with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
+       print (sess.run(c))
+ #+END_SRC
+
+ Below output from the shell console where jupyter notebook server is run shows that GPU with TensorFlow is working:
+
+ 2017-08-08 10:27:53.180144: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.1 instructions, but these are available on your machine and could speed up CPU computations.
+ 2017-08-08 10:27:53.180170: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.2 instructions, but these are available on your machine and could speed up CPU computations.
+ 2017-08-08 10:27:53.180176: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
+ 2017-08-08 10:27:53.180181: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
+ 2017-08-08 10:27:53.180185: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use FMA instructions, but these are available on your machine and could speed up CPU computations.
+ 2017-08-08 10:27:53.528010: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:893] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+ 2017-08-08 10:27:53.528649: I tensorflow/core/common_runtime/gpu/gpu_device.cc:940] Found device 0 with properties:
+ name: GeForce GTX 1070
+ major: 6 minor: 1 memoryClockRate (GHz) 1.645
+ pciBusID 0000:01:00.0
+ Total memory: 7.92GiB
+ Free memory: 7.32GiB
+ 2017-08-08 10:27:53.528682: I tensorflow/core/common_runtime/gpu/gpu_device.cc:961] DMA: 0
+ 2017-08-08 10:27:53.528692: I tensorflow/core/common_runtime/gpu/gpu_device.cc:971] 0:   Y
+ 2017-08-08 10:27:53.528713: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1030] Creating TensorFlow device (/gpu:0) -> (device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0)
+ Device mapping:
+ /job:localhost/replica:0/task:0/gpu:0 -> device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0
+ 2017-08-08 10:27:53.609874: I tensorflow/core/common_runtime/direct_session.cc:265] Device mapping:
+ /job:localhost/replica:0/task:0/gpu:0 -> device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0
+
+ MatMul: (MatMul): /job:localhost/replica:0/task:0/gpu:0
+ 2017-08-08 10:27:53.629104: I tensorflow/core/common_runtime/simple_placer.cc:847] MatMul: (MatMul)/job:localhost/replica:0/task:0/gpu:0
+ b: (Const): /job:localhost/replica:0/task:0/gpu:0
+ 2017-08-08 10:27:53.629124: I tensorflow/core/common_runtime/simple_placer.cc:847] b: (Const)/job:localhost/replica:0/task:0/gpu:0
+ a: (Const): /job:localhost/replica:0/task:0/gpu:0
+ 2017-08-08 10:27:53.629131: I tensorflow/core/common_runtime/simple_placer.cc:847] a: (Const)/job:localhost/replica:0/task:0/gpu:0
+
+
+** Recommended reading for data scientist
+
+ These are content of substance:
+
+ http://neuralnetworksanddeeplearning.com/chap4.html
+
+ http://blog.kaggle.com/category/winners-interviews/
+
+ https://distill.pub/
+
+
+* Handy software engineering
+** File handling
+
+ This group should complement shutil and pathlib of Python. (shutil is of higher level than os package. pathlib is an object oriented for Path concept.)
+
+ With pathlib, mkdir_if_not can be directly implemented. This may be revisited to use pathlib.
+
+ #+NAME:mkdir_pathlib
+ #+BEGIN_SRC python :noweb yes :tangle :exports none
+
+   Path.mkdir(mode=0o777, parents=False, exist_ok=False)
+
+       Create a new directory at this given path. If mode is given, it is combined with the process’ umask value to determine the file mode and access flags. If the path already exists, FileExistsError is raised.
+
+       If parents is true, any missing parents of this path are created as needed; they are created with the default permissions without taking mode into account (mimicking the POSIX mkdir -p command).
+
+       If parents is false (the default), a
+ all I needed is to change the build location and point it to '../build' directorymissing parent raises FileNotFoundError.
+
+       If exist_ok is false (the default), FileExistsError /media/yubrshen/DATA/ai-studyis raised if the target directory already exists.
+
+       If exist_ok is true, FileExistsError exceptions will be ignored (same behavior as the POSIX mkdir -p command), but only if the last path component is not an existing non-directory file.
+
+       Changed in version 3.5: The exist_ok parameter was added.
+
+ #+END_SRC
+
+ Also pathlib provides touch function.
+ #+NAME:touch_pathlib
+ #+BEGIN_SRC python :noweb yes :tangle :exports none
+   from pathlib import Path
+
+   Path('path/to/file.txt').touch()
+ #+END_SRC
+
+ I should always do expand user (~) for pathname to be sure that they are absolute path to avoid trouble down the road of further processing in all my libraries.
+
+*** Preamble
+
+    Import etc.
+
+    #+NAME:preamble_file
+    #+BEGIN_SRC python :noweb yes :tangle ./src/python3/fileTbx.py :exports none
+      import os, shutil
+    #+END_SRC
+
+*** mkdir_if_not
+
+    Make directory specified if it does not exist.
+    It returns the tuple of path of the directory and the boolean wthether the directory exists (should by true).
+    It handles the exception that the directory might be created after checking its existence.
+
+  #+NAME:mkdir_if_not
+  #+BEGIN_SRC python :noweb yes :tangle ./src/python3/fileTbx.py :exports none
+   def mkdir_if_not(path):
+       path = os.path.expanduser(path)
+       if not os.path.exists(path):
+           import errno
+           try: # use try to avoid repeated creating the directory, if it's created after the above checking
+               os.makedirs(path)
+           except OSError as e:
+               if e.errno != errno.EEXIST:
+                   raise
+       return path, os.path.exists(path)
+ #+END_SRC
+
+*** unzip
+
+    unzip a file specified by file_zipped to the directory specified by target_path,
+    making sure the target_path do exist.
+
+ #+NAME:unzip
+ #+BEGIN_SRC python :noweb yes :tangle ./src/python3/fileTbx.py :exports none
+   def unzip(file_zipped, target_path):
+       target_path = os.path.expanduser(target_path)
+       mkdir_if_not(target_path)
+       import zipfile
+       with zipfile.Zip2017-08-08 10:27:53.180144: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.1 instructions, but these are available on your machine and could speed up CPU computations.
+ 2017-08-08 10:27:53.180170: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.2 instructions, but these are available on your machine and could speed up CPU computations.
+ 2017-08-08 10:27:53.180176: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
+ 2017-08-08 10:27:53.180181: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
+ 2017-08-08 10:27:53.180185: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use FMA instructions, but these are available on your machine and could speed up CPU computations.
+ 2017-08-08 10:27:53.528010: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:893] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+ 2017-08-08 10:27:53.528649: I tensorflow/core/common_runtime/gpu/gpu_device.cc:940] Found device 0 with properties:
+ name: GeForce GTX 1070
+ major: 6 minor: 1 memoryClockRate (GHz) 1.645
+ pciBusID 0000:01:00.0
+ Total memory: 7.92GiB
+ Free memory: 7.32GiB
+ 2017-08-08 10:27:53.528682: I tensorflow/core/common_runtime/gpu/gpu_device.cc:961] DMA: 0
+ 2017-08-08 10:27:53.528692: I tensorflow/core/common_runtime/gpu/gpu_device.cc:971] 0:   Y
+ 2017-08-08 10:27:53.528713: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1030] Creating TensorFlow device (/gpu:0) -> (device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0)
+ Device mapping:
+ /job:localhost/replica:0/task:0/gpu:0 -> device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0
+ 2017-08-08 10:27:53.609874: I tensorflow/core/common_runtime/direct_session.cc:265] Device mapping:
+ /job:localhost/replica:0/task:0/gpu:0 -> device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0
+
+ MatMul: (MatMul): /job:localhost/replica:0/task:0/gpu:0
+ 2017-08-08 10:27:53.629104: I tensorflow/core/common_runtime/simple_placer.cc:847] MatMul: (MatMul)/job:localhost/replica:0/task:0/gpu:0
+ b: (Const): /job:localhost/replica:0/task:0/gpu:0
+ 2017-08-08 10:27:53.629124: I tensorflow/core/common_runtime/simple_placer.cc:847] b: (Const)/job:localhost/replica:0/task:0/gpu:0
+ a: (Const): /job:localhost/replica:0/task:0/gpu:0
+ 2017-08-08 10:27:53.629131: I tensorflow/core/common_runtime/simple_placer.cc:847] a: (Const)/job:localhost/replica:0/task:0/gpu:0
+ File(file_zipped, 'r') as zip_ref:
+           zip_ref.extractall(target_path)
+ #+END_SRC
+
+*** random_file_name
+
+    Generate a random file name with suffix as parameter.
+
+ #+NAME:random_file_name
+ #+BEGIN_SRC python :noweb yes :tangle :exports none
+   import random, string, os
+
+   def random_file_name(suffix, length=10):
+       return ''.join(random.choice(string.lowercase) for i in range(length)) + '.' + suffix
+
+ #+END_SRC
+
+ #+NAME:random_file_name_test
+ #+BEGIN_SRC python :noweb yes :tangle :exports none
+   file_name = random_file_name('txt')
+
+   status = os.path.exists(file_name)
+
+   def touch_old(fname, times=None):
+       with open(fname, "a"):
+           os.utime(fname, times)
+
+   status = os.getcwd()
+   import pathlib
+   pathlib.Path(file_name).touch()
+   status = os.path.exists(file_name)
+
+
+ #+END_SRC
+
+
+*** Finding files
+
+
+**** Find files by modification time
+
+Find files that are more than 10 days old:
+#+BEGIN_SRC shell
+find -mtime +10
+#+END_SRC
+
+Find the top level directory (-type d) for the current directory.
+#+BEGIN_SRC shell
+find -type d -maxdepth 1 -mtime +15
+#+END_SRC
+-type f
+for ordinary file, non-directory
+
+-name *.txt
+for name pattern
+
+Find the top level files/directories more 15 days old, and remove them recursively and forcefully.
+#+BEGIN_SRC shell
+find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
+#+END_SRC
+
+**** Find files by extension, or type
+
+   The following snippet works, but it took a long time. Amazingly long.
+   Outside of emacs, it took much shorter time.
+
+   #+BEGIN_SRC shell
+   find /media/yubrshen/DATA/ai-study -regex ".*\.\(mm\)"
+   #+END_SRC
+
+   #+RESULTS:
+   | /media/yubrshen/DATA/ai-study/ASimpleNeuralNetworkModuleForRelat.mm                                                             |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/elastic-weight-consolidation/ElasticWeightConsolidation.mm                                        |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/machine-learning-top-level.mm                                                                     |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/sdc/Key-Concepts-for-Term-One-of-SDC-ND.mm                                                        |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/sdc/session-leader/DevelopmentForUdacitySessionLeader.mm                                          |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/sdc/session-leader/FindingStraightLane.mm                                                         |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/sdc/term-1/CarND-Vehicle-Detection/Notes                                                          | on | Project | of                | Vehicle  | Detection  | and | Tracking.mm |
+   | /media/yubrshen/DATA/ai-study/sdc/term-1/CarND-behavior-cloning/Notes                                                           | on | project | of                | behavior | cloning.mm |     |             |
+   | /media/yubrshen/DATA/ai-study/sdc/term-1/CarND-Traffic-Sign-Classifier-Project/TrafficSignClassificationProject.mm              |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/sdc/term-1/SDC-term-1-notes.mm                                                                    |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/sdc/term-1/SystematicEvaluationOfCNNAdvancesOn.mm                                                 |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/sdc/term-1/vehicle-surrounding/To-brain-storms.mm                                                 |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/sdc/term-2/notes-course/Key-concepts-SDC-term-2.mm                                                |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/sdc/term3/notes/scratch.mm                                                                        |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/sdc/term3/projects/Capstone-Study/Clarification                                                   | of | stop    | considerations.mm |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/sdc/term3/projects/CarND-Capstone/clarify-stop-scenario-algorithm.mm                              |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/sdc/term3/projects/CarND-Path-Planning-Project/Development-of-congestion-model-in-traffic-lane.mm |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/sdc/term3/projects/ROS_pratcice/ROS-notes.mm                                                      |    |         |                   |          |            |     |             |
+   | /media/yubrshen/DATA/ai-study/ShenzhenTransportProjectStudy.mm                                                                  |    |         |                   |          |            |     |             |
+
+** Effective with git (github)
+
+*** To be able to access new branches in remote repository that I have cloned from
+
+    It takes the following:
+
+ #+BEGIN_SRC shell
+ git pull
+ #+END_SRC
+ at a any current branch, to get the meta data of the new branches
+
+*** To access remote branch
+
+ #+BEGIN_SRC shell
+ git checkout <path-of-a-branch>
+ #+END_SRC
+ for example, the path-of-a-branch may origin/tl_detector_sj
+
+*** To set tracking branch with the remote branch
+
+ #+BEGIN_SRC shell
+ git branch --set-upstream-to=origin/tl_detector_sj merge-from-tl-detector-sj
+ #+END_SRC
+
+ tl_detector_sj is the name of the remote branch.
+ merge-from-tl-detector-sj is the name of the local branch corresponding
+
+*** Access github without username and password
+
+    The key is to define the remote origin in the fashion working with ssh.
+    One can follow this: [[https://gist.github.com/developius/c81f021eb5c5916013dc][Set up GitHub push with SSH keys]]
+
+    The key is to have the following:
+
+    git remote set-url origin git@github.com:username/your-repository.git
+
+    then one can do git pull and git push without being bothered by prompts of username and password.
+
+    However, once with ssh set up, actually even the correct username/password would not work, thus
+    one has to use ssh!
+
+
+**** Shell script to add to a new github repository
+
+   The following script performs the initial upload of a local repository to a newly created github repository.
+   The resulted script is in "~/bin/add-new-repository"
+
+   The script's execution permission need to be changed after tangled.
+
+   #+BEGIN_SRC sh
+     chmod 704 ~/bin/add-new-repository
+   #+END_SRC
+
+   The following is an example of the execution.
+   #+BEGIN_SRC sh
+     add-new-repository write-slides-with-jupyter
+   #+END_SRC
+
+   It must have one argument of the name of the repository.
+
+   #+NAME:add-new-repository
+   #+BEGIN_SRC python :noweb yes :tangle ~/bin/add-new-repository :exports none
+     #!/home/yubrshen/miniconda3/bin/python
+     from subprocess import call
+     import sys
+     #git remote set-url origin git@github.com:yubrshen/write-slides-with-jupyter.git
+     #git remote add origin git@github.com:yubrshen/write-slides-with-jupyter.git
+     user_host = "git@github.com:yubrshen/"
+     url = user_host + sys.argv[1] + ".git"
+     #action = "set-url"
+     action = "add" # for initial setup origin url
+     call(["git", "remote", action, "origin", url])  # this works!
+     call(["git", "push", "origin", "master"])
+   #+END_SRC
+
+   Note: to have the command line arguments working, each parameter separated by space
+   must be a separated element in the array.
+
+**** Shell script to clone a repository with ssh setup
+   The following script performs git clone a repository but with ssh setup for the repository.
+   The resulted script is in "~/bin/git-clone-with-ssh"
+
+   The script's execution permission need to be changed after tangled.
+
+   #+BEGIN_SRC sh
+     chmod 704 ~/bin/git-clone-with-ssh
+   #+END_SRC
+
+   The following is an example of the execution.
+   #+BEGIN_SRC sh
+   git-clone-with-ssh https://github.com/yubrshen/CarND-Path-Planning-Project
+   #+END_SRC
+
+   It must have one argument of the name of the repository.
+
+   #+NAME:git-clone-with-ssh
+   #+BEGIN_SRC python :noweb yes :tangle ~/bin/git-clone-with-ssh :exports none
+     #!/home/yubrshen/miniconda3/bin/python
+     from subprocess import call
+     import sys
+     import os
+     # git clone git://github.com/username/your-repository
+     repository = "git://github.com/yubrshen/" + sys.argv[1]
+     call(["git", "clone", repository])
+     os.chdir(sys.argv[1])
+     user_host = "git@github.com:yubrshen/"
+     url = user_host + sys.argv[1] + ".git"
+     # git remote set-url origin git@github.com:username/your-repository.git
+     call(["git", "remote", "set-url", "origin", url])
+   #+END_SRC
+
+*** Typical merge to remote branch
+
+ Step 1: From your project repository, bring in the changes and test.
+
+ git fetch origin
+ git checkout -b hector-dev origin/hector-dev
+ git merge aaron-dev
+
+ Step 2: Merge the changes and update on GitHub.
+
+ git checkout aaron-dev
+ git merge --no-ff hector-dev
+ git push origin aaron-dev
+
+*** Merge with upstream
+
+ The upstream can be the repository from which my repository is forked from.
+
+ Let's define it and name it (udacity):
+
+ #+BEGIN_SRC shell
+ git remote add udacity https://github.com/user/repo.git
+ #+END_SRC
+
+ To merge modifications from udacity:
+
+ #+BEGIN_SRC shell
+ git fetch udacity
+ git merge udacity/merge
+ #+END_SRC
+
+** Effective writing slides
+
+ As of Aug., 2017, my choice of slide writing is jupyter notebook with reveal.js,
+ for details, here is the tutorial on how to get started quickly.
+
+ https://github.com/yubrshen/write-slides-with-jupyter
+
+** Effective with Emacs
+
+*** Disable undersore-to-subscript in org-mode export
+    Have the option in the org-mode file:
+    #+OPTIONS: ^:nil
+
+    ref: https://stackoverflow.com/questions/698562/disabling-underscore-to-subscript-in-emacs-org-mode-export
+*** Understanding of org-mode's option syntax
+
+    #+OPTIONS: ^:nil
+
+    "#+OPTIONS:" indicate the option section
+    "^:" for the option property name for subscript/supperscript
+    "nil" the value to nil
+
+*** Proper use of company mode's auto-completions
+    When typing text, company mode would provide suggestions, use "TAB" key to cycle through the options.
+
+    This is the most effective way. My former way of use "Alt-n" is too cumbersome.
+
+*** Using CDLaTeX to enter math in org-mode
+
+    1. In org-mode, many latex environment delimiters are recognized, and treated the text following the delimiters as latex-environment. The delimiters include
+       1. Environments of any kind. The only requirement is that the \begin statement appears on a new line, at the beginning of the line or after whitespaces only.
+       2. Text within the usual LaTeX math delimiters.
+          To avoid conflicts with currency specifications,
+          single ‘$’ characters are only recognized as math delimiters if the enclosed text contains at most two line breaks,
+          is directly attached to the ‘$’ characters with no whitespace in between, and
+          if the closing ‘$’ is followed by whitespace or punctuation
+          (parentheses and quotes are considered to be punctuation in this context).
+          For the other delimiters, there is no such restriction, so when in doubt, use ‘\(...\)’ as inline math delimiters.
+    http://orgmode.org/manual/LaTeX-fragments.html#LaTeX-fragments
+
+    2. In the latex-environment, cdlatex minor mode can be used, by: (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+       1. Environment templates can be inserted with C-c {.
+
+       2. The <TAB> key will do template expansion if the cursor is inside a LaTeX fragment1.
+       For example, <TAB> will expand fr to \frac{}{} and position the cursor correctly inside the first brace.
+       Another <TAB> will get you into the second brace.
+       Even outside fragments, <TAB> will expand environment abbreviations at the beginning of a line.
+       For example, if you write ‘equ’ at the beginning of a line and press <TAB>,
+       this abbreviation will be expanded to an equation environment.
+       To get a list of all abbreviations, type M-x cdlatex-command-help RET.
+
+       1. Pressing _ and ^ inside a LaTeX fragment will insert these characters together with a pair of braces.
+       If you use <TAB> to move out of the braces, and if the braces surround only a single character or macro,
+       they are removed again (depending on the variable cdlatex-simplify-sub-super-scripts).
+
+       1. Pressing the grave accent ` followed by a character inserts math macros,
+       also outside LaTeX fragments. If you wait more than 1.5 seconds after the grave accent, a help window will pop up.
+
+       1. Pressing the apostrophe ' followed by another character modifies the symbol before point with an accent or a font.
+       If you wait more than 1.5 seconds after the apostrophe, a help window will pop up.
+       Character modification will work only inside LaTeX fragments; outside the quote is normal.
+       http://orgmode.org/manual/CDLaTeX-mode.html#CDLaTeX-mode
+
+*** Effective navigation
+    http://ergoemacs.org/emacs/emacs_navigate_lisp_code.html
+**** Jump to the enclosing form or function in emacs-lisp code
+     - Use backward-up-list Ctrl-Alt + u Move to parent (move to the (beginning of) outer paren pair)
+**** Move to the first child
+     - down-list
+
+**** Move to next sibling
+     - forward-sexp
+**** Move to previous sibling
+     - backward-sexp
+
+*** Define an emacs lisp function and bind it to a key in a major mode (work-flow)
+    1. Define the function: the crucial factor is to call (interactive) at the beginning of the function body.
+       For example,
+       #+NAME:
+       #+BEGIN_SRC emacs-lisp
+         (defun my-try-cdlatex-tab ()
+           "Call org-try-cdlatex-tab interactively"
+           (interactive)
+           (org-try-cdlatex-tab))
+       #+END_SRC
+
+    2. Bind the function to a key binding in the designated major mode, manually
+       To bind a key just in the current major mode, type M-x local-set-key <RET> key cmd <RET>.
+       To bind a key to globally, type M-x global-set-key <RET> key cmd <RET>
+
+    3. Recover the key binding code and put them into code file
+       To make the process of binding keys interactively easier, use the following “trick”: First bind the key interactively, then
+       immediately type C-x <ESC> <ESC> C-a C-k C-g. Now, the command needed to bind the key is in the kill ring, and can be yanked into your file
+
+    4. Embed the code of local-set-key into the designated major mode hook, e.g.
+
+      #+NAME:
+      #+BEGIN_SRC emacs-lisp
+        (add-hook 'org-mode-hook
+                  (lambda ()
+                    (local-set-key [C-S-iso-lefttab] (quote my-try-cdlatex-tab))))
+      #+END_SRC
+      Ref: https://www.gnu.org/software/emacs/manual/html_node/efaq/Binding-keys-to-commands.html
+
+*** Insert figure into org file
+
+    Use the following code to insert a figure.
+
+ #+BEGIN_EXAMPLE
+ #+CAPTION: This is the caption for the next figure link (or table)
+ #+NAME:   fig:SED-HR4049
+ [[./img/a.jpg]]
+ #+END_EXAMPLE
+
+ Note the figure might be captured through screenshot!
+
+*** Permanently, and globally change the margin of org export to PDF
+
+    (setq org-latex-packages-alist '(("margin=2cm" "geometry" nil)))
+    or
+    #+LATEX_HEADER: \usepackage[margin=0.5in]{geometry}
+
+*** Write special character/symbol in org-mode
+    Use command org-entities-help to find the org entity for the symbol, and
+    use {} to seperate the symbol from the rest of the normal character without space in between.
+
+    For example, =p\egrave{}re= for p\egrave{}re
+
+*** Insists on creating new file with helm
+
+    With helm, when accessing new file, if helm does not find any file with name containing the type substrings, then it will create one, no problem.
+
+    But when helm found existing file's name contains the typed as substrings, by default, it will open that the matched file. But one can insist on
+    creating the new file by selecting the selected file name by typing C-P, the one above the matched existing file name.
+
+*** Retrieve last command executed
+
+ last-command and this-command
+
+ Normally, whenever a function is executed, Emacs
+ sets the value of this-command to the function being executed.
+ At the same time, Emacs sets the value of last-command to the previous value of this-command.
+
+*** Debug in emacs
+    Use realgud (M-x realgud:pdb, etc. for different language's debugger)
+    With spacemacs, the keybindings of function keys are working
+    f9 set break point
+    mouse click on the beginning of the line where there is a breakpoint: clear the breakpoint
+    f10 next
+    f11, SPC, Step
+
+    f5: continue
+    S-F5: quit
+
+    Some keybindings may not work for spacemacs
+
+    One can also use the associated command buffer to control the debugger. Overall, it's better than using gdb, and gdbtui in Ubuntu.
+
+    https://github.com/realgud/realgud
+
+    As of 2017/9/6, realgud should replace my use of gdbtui on Ubuntu.
 
 
 
-** Mark and point
+*** Mark and point
 
-   When not in transient-mark-mode, with C-x C-x, it's possible to jump between mark and point. It's quite handy
-   for situation when one pastes large chunks of text, and then would like to go back to the point at the beginning
-   of the pasting. Here are the procedure:
-   1. Pre-condition, transient-mark-mode disabled
-   2. Set mark at the point for pasting, before the pasting action
-   3. Perform the paste operation
-   4. Switch between point and mark by command C-x C-x
+    When not in transient-mark-mode, with C-x C-x, it's possible to jump between mark and point. It's quite handy
+    for situation when one pastes large chunks of text, and then would like to go back to the point at the beginning
+    of the pasting. Here are the procedure:
+    1. Pre-condition, transient-mark-mode disabled
+    2. Set mark at the point for pasting, before the pasting action
+    3. Perform the paste operation
+    4. Switch between point and mark by command C-x C-x
 
-*** How to disable transient-mark-mode
+**** How to disable transient-mark-mode
 
-    A few options:
-    - M-x transient-mark-mode to toggle the transient-mark-mode
-    - or execute (transient-mark-mode 0) in configuration
+     A few options:
+     - M-x transient-mark-mode to toggle the transient-mark-mode
+     - or execute (transient-mark-mode 0) in configuration
 
-*** Temporarily enable transient-mark-mode
+**** Temporarily enable transient-mark-mode
 
-    By command C-u C-x C-x (in spacemacs, SPACE u C-x C-x, can temporarily enable the transient-mark-mode
+     By command C-u C-x C-x (in spacemacs, SPACE u C-x C-x, can temporarily enable the transient-mark-mode
 
-** Read and make notes with PDF: interleave
+*** Read and make notes with PDF: interleave
 
-   1. Create a new org file
-   2. In it, put the line
-#+INTERLEAVE_PDF: <path-to-the-pdf-file>
+    1. Create a new org file
+    2. In it, put the line
+ #+INTERLEAVE_PDF: <path-to-the-pdf-file>
 
-then start to read PDF with command M-x interleave
+ then start to read PDF with command M-x interleave
 
-** Execute shell command and place output to replace the content of the region, in spacemacs
+*** Execute shell command and place output to replace the content of the region, in spacemacs
 
-   1. Select the region to be processed and replaced
-   2. SPACE u M-! <cmd>
+    1. Select the region to be processed and replaced
+    2. SPACE u M-! <cmd>
 
-   SPACE u is for universal argument to replace the selected region.
+    SPACE u is for universal argument to replace the selected region.
 
-** Way to let Python live code work with particular environment:
-   start the environment in a shell, and start emacs from the shell
+*** Way to let Python live code work with particular environment:
+    start the environment in a shell, and start emacs from the shell
 
 
-** Indent-region: format a region to have proper indent
-   Select the region needing to reformat, then indent-region
-   C-M \
+*** Indent-region: format a region to have proper indent
+    Select the region needing to reformat, then indent-region
+    C-M \
 
-** recursive grep in a directory
+*** recursive grep in a directory
 
-   M-x rgrep
+    M-x rgrep
 
-   Alternatively, (not really explored, not needed beyond rgrep).
+    Alternatively, (not really explored, not needed beyond rgrep).
 
-Use helm-projectile-grep/ack/ag: You can search for everything starting from project root. Later if you want to save the search results, press F3 or press TAB to switch to action menu and select the 3rd action. To navigate hgrep buffer:
-C-<down>: go to next match and open the match.
-C-<up>: go to previous match and open the match.
-M-<down>: go to next match without opening the match.
-M-<up>: go to next match without opening the match.
-C-o: open current match in other window.
-RET: open current match in current window.
-Use helm-projectile-find-dir (note the helm prefix; you must use proper Helm commands from helm-projectile package in general): narrow to a desired directory and press C-u C-s to recursively search in that directory. If you don't press C-u, it just searches in that directory without going deeper.
+ Use helm-projectile-grep/ack/ag: You can search for everything starting from project root. Later if you want to save the search results, press F3 or press TAB to switch to action menu and select the 3rd action. To navigate hgrep buffer:
+ C-<down>: go to next match and open the match.
+ C-<up>: go to previous match and open the match.
+ M-<down>: go to next match without opening the match.
+ M-<up>: go to next match without opening the match.
+ C-o: open current match in other window.
+ RET: open current match in current window.
+ Use helm-projectile-find-dir (note the helm prefix; you must use proper Helm commands from helm-projectile package in general): narrow to a desired directory and press C-u C-s to recursively search in that directory. If you don't press C-u, it just searches in that directory without going deeper.
 
-* Effective with web browsing
+*** Unbind undo-key u
+
+  #+NAME:unbind-undo-key-u
+  #+BEGIN_SRC emacs-lisp
+  (unbind-key (kbd "u") evil-normal-state-map)
+  #+END_SRC
+
+  #+RESULTS: unbind-undo-key-u
+
+  It works that the key is no longer bound for undo
+
+  Now the new undo key is C-_
+
+*** make the CAPSLOCKS key as ctrl-key in Ubuntu (X-system)
+
+    In order to prevent repetitive injury syndrom (RSI) of hands with keyboard,
+    especially emacs-pinky finger injury.
+
+ setxkbmap -layout us -option ctrl:nocaps
+ https://askubuntu.com/questions/33774/how-do-i-remap-the-caps-lock-and-ctrl-keys
+
+*** Caution: with emacs/babel
+
+*** Don't run long running application from emacs babel code block, it might block emacs itself.
+
+ - such as running a video player, etc.
+
+*** Stop evaluation of code blocks at the export
+
+ Put it at the top of the org file,
+ #+BIND: org-export-use-babel nil
+ apply it by C-c C-c
+ it works!
+
+ The following does not work for me with emacs 25:
+
+ Place the following at the top of the org file, as per file variable:
+ # -*- org-export-babel-evaluate: nil -*-
+
+** Effective with web browsing
 
 ** Cycle through tabs in Chrome browser
 
@@ -598,336 +853,965 @@ Use helm-projectile-find-dir (note the helm prefix; you must use proper Helm com
 ** Switch to previous tab in Chrome browser
    Allt+w (with a plugging installed)
 
-* Effective regular expression building and testing
+** Effective regular expression building and testing
 
   Here is an effective tool to build and validate regular expression. Make sure to select Javascript (not Php) as language to be closer to C++, and others.
 
+** Effective in programming
 
-* Build debug enabled executable from C++ source
-at the root of the project:
+*** How to read program effectively?
 
-cmake -DCMAKE_BUILD_TYPE=Debug build
+    - Start with the first entry of the program, follow through the implementation of the top level functions in the entry implementation
 
-* Effective C++/C debug
+    - Follow along the paths of the implementation until comfortable to comprehension.
 
-  As of 2017/9/6, see realgud entry: [[Debug in emacs]], as it's more user friendly than gdbtui.
+    - This may ignore all the other code not along the main call paths
 
-  Use gdbtui (GDB with GUI):
-  gdbtui <path-to-executable>
-
-  To enable cmake to setup for debug, use cmake-gui, select build type as Debug, then make on the command line.
-
-  Major command in GDB:
-  break <line number>
-  run to run the loaded program
-  continue to resume from breakpoint
-
-  display <variable-name> to auto show the value of the variable
-  print <variable-name> to show the value of the variable once; print *<pointer> (to show the data pointed by the pointer)
-
-  undisplay to remove all previously displayed variables.
-
-** Passing arguments and rediction from standard input still works inside gdbtui
-
-Pass the arguments to the run command from within gdb.
-
-$ gdb ./a.out
-(gdb) r arg1 arg2 < t
-Starting program: /dir/a.out < t
-
-** Typical workflow with GDB
-
-   1. Make
-   2. gdbtui <executable>
-   3. break <all interested line numbers>
-   4. r arg1 arg2 < <input_in_file>
-   5. examine at a breakpoint
-   6. continue, repeat step 5 (the previous)
-
-** Running C++ program interactive with emacs/ubuntu
-   There are a few options:
-   1. Use cpp.sh (a web site, paste code to the code window and run). Note: when there is some crash, it may not report the error, such as segmentation fault, etc.
-   2. Use my own sandbox mechanism of tangle to ~/programming/cplusplus/sandbox/src/sandbox.cpp and run in command shell (Note, the command to tangle in spacemacs is <SPACE> u C-v C-t t, not to confusing with u without <SPACE> which is undo!
-   3. Use emacs org-babel executing code block, see https://emacs.stackexchange.com/questions/15065/org-mode-babel-interactive-code-block-evaluation
-   4. Use Jupyter C++ kernel, see http://shuvomoy.github.io/blog/programming/2016/08/04/Cpp-kernel-for-Jupyter.html for leads
-
-** There is a way to construct vector literals in C++
-   For example,
-   vector<int> a_vector = {1, 2, 3} // This requires C++11
-    There might be way to use << operation, such as
-    vector<string> a_vector;
-    a_vector << "Hello" << "World"; // not verified.
-
-    Another to do it is via array initialization
-
-static const int arr[] = {16,2,77,29};
-vector<int> vec (arr, arr + sizeof(arr) / sizeof(arr[0]) );
+    - Make notes of the domain model of the program while tracking the code paths
 
 
-** It's complicated to find length of a C++ array, use vector instead
+** Effective use of HackerRank drill page
 
-   int a[7];
-   std::cout << "Length of array = " << (sizeof(a)/sizeof(*a)) << std::endl;
+ 1. Copy the description to my editor to help to parse and understanding
+ 2. Code the required in emacs babel buffer
+ 3. Paste the coded code to HackerRank's window for the code segment
+ 4. Excute "Run Code" in HackerRank (as it provides better error visualization)
+ 5. Fix the code in my own buffer of emacs, repaste
+ 6. When passing the "Run Code", submit
+ 7. If there is any failed case, download the test case.
+ 8. Paste the input to the custom input, while the expected output to emacs's scrath buffer
+ 9. Run Code to find out the difference between the output  and the expected
+ 10. Only as last resort, copy all the code including main to emacs buffer and run the tests locally.
 
-** Use for (auto x:sequence) { <access code>}
-   To traverse the sequence, to avoid confusion and mistakes with iteration variable.
+** Effective in shell
 
-** Use C++11 for new and improved expressiveness
 
-** With spacemacs, I found M-x gdb works for C++ debugging
+*** Invoke command when a file or folder changes
 
-   - To set breakpoint C-x C-a C-b in a source code buffer
-   - To clear a breakpoint at the place of the breakpoint, C-x C-a C-d
-   - Restore multiple window layout:
-If you ever change the window layout, you can restore the many-windows layout by typing M-x gdb-restore-windows . To toggle between the many windows layout and a simple layout with just the GUD interaction buffer and a source file, type M-x gdb-many-windows .
-GDB User Interface Layout - GNU Emacs Manual - GNU.org
-https://www.gnu.org/software/emacs/manual/.../emacs/GDB-User-Interface-Layout.html
-
-- running again will automatically reload the updated binary.
-
-* Effective C++
-** object assignment need to have default constructor to work
-
-  For object assignment to work, the class for the object must have default constructor, taking no arugment.
-
-** C++ compiler can provide the copy constructor and assignment operator for call with pointer as member
-
-  Also note, for class without pointer as member, then the copy constructor, and assignment operator can be provided by
-  the compiler, no need to code manually, unless there is special requirements in the implementation.
-
-  While with class with pointer as member, then the copy constructor and assignment operator must be manually defined,
-  as it matters how "deep" the copy and assignment should be performed along the pointer.
-
-** #include <algorithm> needed for operator of vector of string
-   In the following code,
-vector.erase(std::remove(a_vector.begin(), a_vector.end(), value), a_vector.end());
-
-it needs to use the special string value comparison defined in algorithm to work.
-without including algorithm, it will use the default, causing the following error:
-
-#+BEGIN_QUOTE
-error: cannot convert ‘std::vector<std::__cxx11::basic_string<char> >::iterator {aka __gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char>*, std::vector<std::__cxx11::basic_string<char> > >}’
-to ‘const char*’ for argument ‘1’ to ‘int remove(const char*)’
-   a_vector.erase(std::remove(a_vector.begin(), a_vector.end(), value), a_vector.end());
-
-#+END_QUOTE
-
-without #include <algorithm>, it will also cause the following error:
-
-#+BEGIN_QUOTE
-In instantiation of
-‘typename T::iterator min_map_element(T&) [with T = std::map<std::__cxx11::basic_string<char>, float>; typename T::iterator = std::_Rb_tree_iterator<std::pair<const std::__cxx11::basic_string<char>, float> >]’:
-required from here
-error: ‘min_element’ was not declared in this scope
-   return min_element(m.begin(), m.end(),
-
-#+END_QUOTE
-
-** The lifetime of auto declaration variables (objects) is within the scope where it's declared
-   - auto declaration: such as int i;
-   - a pair of bracket define a scope
-   - a variable declared as auto variable would not have guarantee to exist outside of its declaring scope!
-
-   [[ihttps://stackoverflow.com/questions/11137516/scope-vs-lifetime-of-variabled:][Scope vs. Lifetime of Variable]]
-
-   Also note that Python's scope is much simpler and more generous: only function and global are scopes,
-   the other code block is not scope, thus has no impact to the lifetime of Python object
-
-** The lifetime of returned value
-   The return value from a function is temporary only guarantee to exist during the statement of calling the function.
-   Therefore the returned value should be assigned to an variable in order to extend or preserve the lifetime of the returned value.
-
-** Enable core dump generation in Ubuntu
-
-   On terminal to execute the following:
-#+BEGIN_SRC sh
-ulimit -c unlimited
+ #+BEGIN_SRC shell
+ when-changed file-or-folder-monitor-for-change <command-as-usual>
  #+END_SRC
 
-to have it permanent, put the command in ~/.profile
+ Here is the repository for when-changed to install:
+ https://github.com/joh/when-changed
 
-** Investigation of core dump file
+** Positional shell command arguments
+ If some_program were a bash shell script, we could read each item on the command line because the positional parameters contain the following:
+ $0 would contain "some_program"
+ $1 would contain "word1"
+ $2 would contain "word2"
+ $3 would contain "word3"
 
-   gdb <executable> ./core
+ #+BEGIN_SRC shell :tangle "~/bin/vedio-play.sh"
+   #!/bin/bash
+   # this is the command to view a *.mov file, working in Ubuntu 16.04
+   mplayer -vo vdpau $1 # ~/tmp/potential_bug.mov
+ #+END_SRC
 
-** To manipulate a vector as value keyed in a std::map
+** Effective with Ubuntu
 
-   The address of the vector (pointer) instead of vector value must be used. Otherwise, it would not be the same vector, but a new instance
-   of empty vector.
+*** Swap CAPSLOCKS and Esc
 
-   Anything on the left hand-side or target of manipulation, must use pointer to the address, cannot be the value.
+ In order to be more effective with vi/emacs (vi-mode), I'd like to use CAPSLOCKS to be escape key.
 
-   Note, to express a map from string to vector pointer should be as following:
-   map<string, vector<double>* > // not map<string, *vector<double> >
+ The following procedure didn't work, as =/org/gnome/desktop/input-sources/xkb-options $capslock= did not exist.
 
+**** A real successful one
 
-* Effective Python
+ With emacs, use ,, as the escape key
+ #+NAME:keychord-escape
+ #+BEGIN_SRC emacs-lisp
+ (evil-escape-mode)
+ (setq-default evil-escape-key-sequence ",,")
+ (setq-default evil-escape-delay 0.3) ; the suggested is 0.2, but to me it's still not enough delay, 0.3 seems better.
+ #+END_SRC
 
-** Use python-live-mode in emacs to visualize the execution
+ #+RESULTS: keychord-escape
+ : 0.3
 
-   In the python-live-mode, all value assigned to a variable/label would be shown it's value at the moment of label reference.
-   It makes it quite clean of the program execution in terms of value changes.
+ ;; The delay between the two key presses can be customized with the variable evil-escape-delay. The default value is 0.1. If your key sequence is composed with the two same characters it is recommended to set the delay to 0.2.
 
-   python-live-mode can be started by keys 'l in python-mode in spacemacs.
+ Note, it only works after a space ' '
 
-** Avoid the trap of Python variable assignment
+**** A failed one
 
-deepcopy needed to copy multi-dimension list,
-Python's variable is just a label to data value.
-For container type such as list, the assignment only adds one more label for the variable on the right side of assignment to the data value referred by the variable on the left side of the assignment!
-Thus modifying using the either label would cause the same data value (container) to be modified!
+ The following solution is not reliable sometimes it worked, but afterwards, only escape became
+ CAPSLOCKS, but CAPSLOCKS didn't function as escape!
 
-The solution is use copy for one-dimensional list, or full list slicing [:]
+ I gave up on this solution, as I have much better one in emacs using evil-escape-mode with keybinding of ,,
+ as of<2017-12-11 Mon 09:42>
 
-For multiple dimension list, one has to use deepcopy to make actual data duplication.
+ According to https://askubuntu.com/questions/363346/how-to-permanently-switch-caps-lock-and-esc
 
-It helps to refresh to the understanding of label semantics of Python variable:  http://python.net/~goodger/projects/pycon/2007/idiomatic/handout.html#python-has-names
+ Another way to do this is through the dconf-editor. This method has a few extra steps from gnome-tweak-tool, but is useful if you don't want to pull in the dependencies from the teak tool.
 
-Here is examples to illustrate the problems and solutions:
+ This will allow you to use the caps:swapescape syntax and automatically keep the change permanent.
 
-In the examples, I assume using python live-mode in emacs to visualize the exectution result.
+ sudo apt-get install dconf-tools
+ After starting the dconf-editor, navigate to org >> gnome >> desktop >> input-sources
 
-#+NAME:assignment-semantics
-#+BEGIN_SRC python :noweb yes :tangle :exports none
-  # Scalar assignment, the assignment has copy semantics
-  x = 1  # value 1 has a label x
-  y = x  # value 1 has another label y
-  y = y -1                        # the value referred by y has changed, subtracted by 1,
-  # it's a different value, no longer the same value as the one referred by x and y before.
-  # x still refers to the previous value
-  z = x
-  w = y                           # now y refers to a new value
+ Add the options that you need in xkb-options. The option strings are surrounded by single quotes and separated by commas. Be careful not to delete the brackets on the ends.
 
-  # array, one dimension, assignment has no copy semantics:
+ The value to set to xkb-options is 'terminate:ctrl_alt_bksp,caps:swapescape'
 
-  x_array = [1, 2, 3]
-  y_array = x_array
-  y_array[0] = -1
-  z = x_array                     # The array value referred by x_array is also modified in the same way
+ Now, it's working.
 
-  # use list.copy for one dimension array to implement the copy semantics:
+**** A failed attempt.
+  #+BEGIN_SRC shell
+  ls -lt /org/gnome/desktop/input-sources/xkb-options
+  #+END_SRC
 
-  x_array = [1, 2, 3]             # the array [1, 2, 3] has a label x_array
-  y_array = x_array.copy()        # y_array refers to a new list, one dimensional copied from x_array, one dimensional
-  y_array[0] = -1                 # using the label, y_array, modify the value's element
-  z = x_array                     # I expect that value referred by x_array name would not be modified,
-  # as y_array now refers to a different value.
-  w = y_array                     # I expect the value referred by y_array name have the value modified
+  #+RESULTS:
 
-  # For one dimensional list, use full extent list slicing would work as well as list.copy():
-  x_array = [1, 2, 3]
-  y_array = x_array[:]
-  y_array[0] = -1
-  z = x_array
+   #+BEGIN_SRC shell :tangle ~/bin/swap-caps-esc.sh
+   #!/bin/bash
 
-  # array, two dimensions, assignment has no copy semantics
+   current=$(dconf read /org/gnome/desktop/input-sources/xkb-optionsy)
+   swapped="['caps:swapescape']"
+   capslock="['caps:capslock']"
+   echo "Current status: $current"
 
-  x_array_array = [[1, 2, 3], [3, 2, 1]]
-  y_array_array = x_array_array
-  y_array_array[0][0] = -1
-  z = x_array_array               # the two-dimensional array value referred by x_array has been modified
-  w = y_array_array
+   if [ "$current" == "$swapped" ]
+   then
+     echo "Making caps and escape WORK NORMALLY"
+     dconf write /org/gnome/desktop/input-sources/xkb-options $capslock
+   elif [ "$current" == "$capslock" ]
+   then
+     echo "Swapping caps and escape"
+     dconf write /org/gnome/desktop/input-sources/xkb-options $swapped
+   else
+     echo "caps is not swapescaped nor capslock. Doing nothing."
+   fi
+   #+END_SRC
 
-  # Try list.copy() for two dimensions array: (it has no real copy semantics, as it's just a shallow copy)
+   #+BEGIN_SRC shell
+   dconf read /org/gnome/desktop/input-sources/xkb-optionsy
+   #+END_SRC
 
-  x_array_array = [[1, 2, 3], [3, 2, 1]]
-  y_array_array = x_array_array.copy()
-  y_array_array[0][0] = -1
-  z = x_array_array
-  w = y_array_array
+   #+RESULTS:
 
-  #For multi-dimensions, deepcopy from copy module must be used to work :
-  from copy import deepcopy
-  x_array_array = [[1, 2, 3], [3, 2, 1]]
-  y_array_array = deepcopy(x_array_array)
-  y_array_array[0][0] = -1
-  print(x_array_array)
-  print(y_array_array)
-
-  # For 2-D list, using explicit slicing would be faster than deepcopy:
-  x_array_array = [[1, 2, 3], [3, 2, 1]]
-  y_array_array = [row[:] for row in x_array_array]
-  y_array_array[0][0] = -1
-  print(x_array_array)
-  print(y_array_array)
+   #+BEGIN_SRC shell
+   chmod u+x ~/bin/swap-caps-esc.sh
+   #+END_SRC
 
 
+   #+RESULTS:
 
-  grid = [[0, 0],
-          [1, 0]]
+** Remove applications from startup in Ubuntu 16.04
 
-  a_copy = deepcopy(grid)
+ #+BEGIN_SRC shell
+   cd ~/.config/autostart/
+   # remove the start up file for the application
+   # for example
+   mv skypeforlinux.desktop skypeforlinux.desktop.bak
+ #+END_SRC
+** Knowledge bites
 
-  for x in range(len(a_copy)):
-    for y in range(len(a_copy[0])):
-      a_copy[x][y] = -1
+*** What is CUDA and cuDNN?
+      CUDA - API/Language to talk to the GPU.
+          CUDA is NVIDIA’s language/API for programming on the graphics card. I’ve found it to be the easiest way to write really high performance programs run on the GPU.  <https://developer.nvidia.com/cudnn>
+      cuDNN - library for Deep Learning using CUDA.
+          cuDNN is a library for deep neural nets built using CUDA. It provides GPU accelerated functionality for common operations in deep neural nets. You could use it directly yourself, but other libraries like TensorFlow already have built abstractions backed by cuDNN.
 
-  x = grid
-#+END_SRC
+** Upgrade freeplane
 
-The moral of the story, in Python, assignment never makes a copy of the value referred by the name.
-To copy, the action must be explicit.
+ After downloading the latest from https://sourceforge.net/projects/freeplane/files/latest/download
+ #+BEGIN_SRC shell
+   cd ~/bin
+   rm freeplane.sh
+   ln -s freeplane-1.6.10/freeplane.sh freeplane.sh
+ #+END_SRC
 
-#+RESULTS: assignment-semantics
-: None
+ #+RESULTS:
 
-** The concept of variable/label scope in Python
+ The version of freeplane-1.6.10 has a problem of misplacement of cursor, when editing node with \latex format.
+ The problem is with 1.6.3, .7, 10. The work-around is to edit with \latex first, then after completion, add \latex
 
-   Only function introduces new scope besides the global scope at the module/file level (variable/label assignment)
+ #+RESULTS:
 
-   The other code block of if, for, etc. does not introduce new scope. The scope would be the same as the enclosing scope.
-   This seems simpler and different from C++, or Scala, even Clojure!
+ Verify the update:
+ #+BEGIN_SRC shell
+ ls -lt ~/bin/freeplane.sh
+ #+END_SRC
 
-** List comprehension is functional, only provide values, but does not provide the modification side effect!
+ #+RESULTS:
+ : lrwxrwxrwx 1 yubrshen yubrshen 28 Nov 22 21:02 /home/yubrshen/bin/freeplane.sh -> freeplane-1.6.3/freeplane.sh
 
-   It's not possible to modify element in list comprehension, as illustrated by the following example:
 
-#+NAME:verify-modification-by-list-comprehension
-#+BEGIN_SRC python :noweb yes :tangle :exports none
-  expand = [1, 2, 3]
+** Setup for screencast with vokoscreen
 
-  for cell in expand:
-      cell = cell * 2
+ 1. To record voice, after click on Audio, must select Pulse and select both Monitor of Built-in Audio Analog Stero, and Built-in Audio Analog Stero
+ 2. To play back must use OpenShot. Totem nor vlc works. But banshee, and Gnome mplayer work.
+ 3. For video capture, click on the webcam, muse use the default settings (Frame: 25; Videocodec: libx264; Format: mkv; Audiocodec: libmp3lame
+ 4. For the position of the video image, one may be able to arrange, but to make the video visible, it must be part of the screen capture area.
 
-  x = expand
+** Keyboard improvement
 
-  new_expand = [-1 for cell in expand]
+ The problems:
 
-#+END_SRC
+ - Esc key is too far away, not convenient to access. With spacemacs,
+ it's used very often. Binding it to ,, works most of the time, but not always.
+ (It's a minor problem with ,, bound for esc.)
 
-In this example, expand was not modified. The first list comprehension, only produces the values of the doubles of the elements of expand.
-But it does not change the elements of expand.
+ - Control key on the left is not convenient to access. It's no longer possible to ctrl-x with one hand with Dvorak keyboard.
+ (A potential solution is to use palm to press it.)
 
-However, it's possible to use list comprehension to construct new value as the second list comprehension shows.
-new_expand will have the same dimensions but all value would be -1.
+ Potential solutions:
 
-** Debug Python code with pdb.set_trace()
+ - Esc:
+   - bound to CAPSLOCKS
+   - bind shift-CAPSLOCKS for CAPSLOCKS
+   - bound to ,,
+   - bind control to esc
 
-   import pdb
+ - Control key
+   - use palm to press it
+   - use xcape to bind to long press CAPSLOCKS for left control key
+   - use xcape to bind to long press Enter for the right control key
+   - bind esc to control key
 
-   pdb.set_trace() // set break point at the location, when the program reach this location, it will enter debugger, then one can do the debug there.
+ Map CAPSLOCKS to control and escape both:
 
-* Effective use of HackerRank drill page
+ http://tiborsimko.org/capslock-escape-control.html
 
-1. Copy the description to my editor to help to parse and understanding
-2. Code the required in emacs babel buffer
-3. Paste the coded code to HackerRank's window for the code segment
-4. Excute "Run Code" in HackerRank (as it provides better error visualization)
-5. Fix the code in my own buffer of emacs, repaste
-6. When passing the "Run Code", submit
-7. If there is any failed case, download the test case.
-8. Paste the input to the custom input, while the expected output to emacs's scrath buffer
-9. Run Code to find out the difference between the output  and the expected
-10. Only as last resort, copy all the code including main to emacs buffer and run the tests locally.
+ #+BEGIN_SRC shell
+ # make CapsLock behave like Ctrl:
+ setxkbmap -option ctrl:nocaps
 
-* Effective in programming
+ # make short-pressed Ctrl behave like Escape:
+ xcape -e 'Control_L=Escape'
+ #+END_SRC
 
-** How to read program effectively?
+ #+RESULTS:
 
-   - Start with the first entry of the program, follow through the implementation of the top level functions in the entry implementation
+ Troubleshooting
+ If the CapsLock key gets "stuck" and produces say uppercase letter combinations instead of lowercase ones,
+ the easiest way to remove xcape mapping is to revert CapsLock key function via xmodmap:
 
-   - Follow along the paths of the implementation until comfortable to comprehension.
+ #+BEGIN_SRC shell0
+ xmodmap -e 'keycode 0x42 = Caps_Lock'
+ #+END_SRC
+ followed by re-running of the keyboard modification script.
 
-   - This may ignore all the other code not along the main call paths
+ More elaborate configuration example:
 
-   - Make notes of the domain model of the program while tracking the code paths
+ #+BEGIN_SRC shell
+ # set internal keyboard layout:
+ deviceid=$(xinput -list | grep 'AT .* keyboard' | head -1 | grep -oE 'id=[0-9]+' | sed 's/id=//g')
+ if [ "${deviceid}" != "" ]; then
+     setxkbmap -device "${deviceid}" dvorak
+     setxkbmap -device "${deviceid}" -option ctrl:nocaps # make CapsLock behave like Ctrl
+ fi
+
+ # set Kinesis keyboard layout:
+ for deviceid in $(xinput -list | grep ' HID ' | grep -oE 'id=[0-9]+' | sed 's/id=//g'); do
+     if [ "${deviceid}" != "" ]; then
+         setxkbmap -device "${deviceid}" us # 'us' but it means 'dvorak' actually due to Kinesis
+         setxkbmap -device "${deviceid}" -option ctrl:nocaps # make CapsLock behave like Ctrl
+     fi
+ done
+ #+END_SRC
+
+ #+BEGIN_SRC shell
+ deviceid=$(xinput -list | grep 'AT .* keyboard' | head -1 | grep -oE 'id=[0-9]+' | sed 's/id=//g')
+ echo $deviceid
+
+ #+END_SRC
+
+ #+RESULTS:
+ : 15
+
+** Programming: Promptly and early return: a way to simplify if then else enclosing hierarchy:
+
+ The following code illustrates the technique to reduce excessive levels of if else enclosing. The alternative
+ would have been use if then else all the way.
+
+ The pros of this approach is that the code would be shorter.
+
+ The cons is that when the code is indeed long, the context of the logic ("else" assumption would be lost, hard to read the code.)
+ For this context, needs comment to remind the fact.
+
+ That is, use comment to replace the else statement.
+ #+NAME:
+ #+BEGIN_SRC python :noweb tangle :tangle
+   # triangle(a, b, c) analyzes the lengths of the sides of a triangle
+   # (represented by a, b and c) and returns the type of triangle.
+   #
+   # It returns:
+   #   'equilateral'  if all sides are equal
+   #   'isosceles'    if exactly 2 sides are equal
+   #   'scalene'      if no sides are equal
+   #
+   # The tests for this method can be found in
+   #   about_triangle_project.py
+   # and
+   #   about_triangle_project_2.py
+   #
+   def triangle(a, b, c):
+       def test_two_sides(a, b, c):
+           if ((a + b) <= c):
+               raise(TriangleError)
+
+           if (a == b):            # already legal sides
+               if (c == a):
+                   return 'equilateral'
+               else:
+                   return 'isosceles'
+           else:
+               return None
+       if (a <= 0) or (b <= 0) or (c <= 0):
+           raise(TriangleError)
+       # below all sides are positive now
+       result = test_two_sides(a, b, c) or test_two_sides(a, c, b) or test_two_sides(b, c, a)
+       return result if result else 'scalene'
+
+   # Error class used in part 2.  No need to change this code.
+   class TriangleError(StandardError):
+       pass
+
+ #+END_SRC
+
+** Capture shell output to a file
+
+ Sometimes just redirect the standard output may not work. I don't know why.
+
+ #+BEGIN_SRC shell
+ rostopic echo /rosout > rosout.log
+ #+END_SRC
+
+ But the following seemed working:
+
+ #+BEGIN_SRC shell
+ rostopic echo /rosout &>> rosout.log
+ #+END_SRC
+
+ This one capture all including standard error, as well as standard output, and it captures by appending.
+
+** Redirection of command output to files: various options
+
+ To write the output of a command to a file, there are basically 10 commonly used ways.
+
+ Overview:
+ Please note that the n.e. in the syntax column means "not existing".
+ There is a way, but it's too complicated to fit into the column. You can find a helpful link in the List section about it.
+
+           || visible in terminal ||   visible in file   || existing
+   Syntax  ||  StdOut  |  StdErr  ||  StdOut  |  StdErr  ||   file
+ ==========++==========+==========++==========+==========++===========
+     >     ||    no    |   yes    ||   yes    |    no    || overwrite
+     >>    ||    no    |   yes    ||   yes    |    no    ||  append
+           ||          |          ||          |          ||
+    2>     ||   yes    |    no    ||    no    |   yes    || overwrite
+    2>>    ||   yes    |    no    ||    no    |   yes    ||  append
+           ||          |          ||          |          ||
+    &>     ||    no    |    no    ||   yes    |   yes    || overwrite
+    &>>    ||    no    |    no    ||   yes    |   yes    ||  append
+           ||          |          ||          |          ||
+  | tee    ||   yes    |   yes    ||   yes    |    no    || overwrite
+  | tee -a ||   yes    |   yes    ||   yes    |    no    ||  append
+           ||          |          ||          |          ||
+  n.e. (*) ||   yes    |   yes    ||    no    |   yes    || overwrite
+  n.e. (*) ||   yes    |   yes    ||    no    |   yes    ||  append
+           ||          |          ||          |          ||
+ |& tee    ||   yes    |   yes    ||   yes    |   yes    || overwrite
+ |& tee -a ||   yes    |   yes    ||   yes    |   yes    ||  append
+ List:
+ command > output.txt
+
+ The standard output stream will be redirected to the file only, it will not be visible in the terminal. If the file already exists, it gets overwritten.
+
+ command >> output.txt
+
+ The standard output stream will be redirected to the file only, it will not be visible in the terminal. If the file already exists, the new data will get appended to the end of the file.
+
+ command 2> output.txt
+
+ The standard error stream will be redirected to the file only, it will not be visible in the terminal. If the file already exists, it gets overwritten.
+
+ command 2>> output.txt
+
+ The standard error stream will be redirected to the file only, it will not be visible in the terminal. If the file already exists, the new data will get appended to the end of the file.
+
+ command &> output.txt
+
+ Both the standard output and standard error stream will be redirected to the file only, nothing will be visible in the terminal. If the file already exists, it gets overwritten.
+
+ command &>> output.txt
+
+ Both the standard output and standard error stream will be redirected to the file only, nothing will be visible in the terminal. If the file already exists, the new data will get appended to the end of the file..
+
+ command | tee output.txt
+
+ The standard output stream will be copied to the file, it will still be visible in the terminal. If the file already exists, it gets overwritten.
+
+ command | tee -a output.txt
+
+ The standard output stream will be copied to the file, it will still be visible in the terminal. If the file already exists, the new data will get appended to the end of the file.
+
+ (*)
+
+ Bash has no shorthand syntax that allows piping only StdErr to a second command, which would be needed here in combination with tee again to complete the table. If you really need something like that, please look at "How to pipe stderr, and not stdout?" on Stack Overflow for some ways how this can be done e.g. by swapping streams or using process substitution.
+
+ command |& tee output.txt
+
+ Both the standard output and standard error streams will be copied to the file while still being visible in the terminal. If the file already exists, it gets overwritten.
+
+ command |& tee -a output.txt
+
+ Both the standard output and standard error streams will be copied to the file while still being visible in the terminal. If the file already exists, the new data will get appended to the end of the file.
+
+ shareeditflag
+ edited May 23 at 12:39
+
+
+ Community♦
+ 1
+ answered Feb 8 '16 at 14:52
+
+
+ Byte Commander
+ 45.4k19121222
+ 14
+
+ Thanks for the table, it's excellent! This should be top answer – DevShark Aug 15 '16 at 16:24
+
+
+ Great information! Can you also add the details of 2>&1 / 1>&2 / 3>&1 ? – karthick87 Sep 19 '16 at 16:30
+  	 upvote
+ 	 flag
+ @karthick87 This is not really related to the question about redirecting output to a file, because it just redirects one stream to another. 2>&1 redirects STDERR to STDOUT, 1>&2 redirects STDOUT to STDERR and 3>&1 would redirect stream 3 to STDERR. – Byte Commander Sep 19 '16 at 16:42
+
+* Handy languages
+** Effective C++
+*** object assignment need to have default constructor to work
+
+   For object assignment to work, the class for the object must have default constructor, taking no arugment.
+
+*** C++ compiler can provide the copy constructor and assignment operator for call with pointer as member
+
+   Also note, for class without pointer as member, then the copy constructor, and assignment operator can be provided by
+   the compiler, no need to code manually, unless there is special requirements in the implementation.
+
+   While with class with pointer as member, then the copy constructor and assignment operator must be manually defined,
+   as it matters how "deep" the copy and assignment should be performed along the pointer.
+
+*** #include <algorithm> needed for operator of vector of string
+    In the following code,
+ vector.erase(std::remove(a_vector.begin(), a_vector.end(), value), a_vector.end());
+
+ it needs to use the special string value comparison defined in algorithm to work.
+ without including algorithm, it will use the default, causing the following error:
+
+ #+BEGIN_QUOTE
+ error: cannot convert ‘std::vector<std::__cxx11::basic_string<char> >::iterator {aka __gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char>*, std::vector<std::__cxx11::basic_string<char> > >}’
+ to ‘const char*’ for argument ‘1’ to ‘int remove(const char*)’
+    a_vector.erase(std::remove(a_vector.begin(), a_vector.end(), value), a_vector.end());
+
+ #+END_QUOTE
+
+ without #include <algorithm>, it will also cause the following error:
+
+ #+BEGIN_QUOTE
+ In instantiation of
+ ‘typename T::iterator min_map_element(T&) [with T = std::map<std::__cxx11::basic_string<char>, float>; typename T::iterator = std::_Rb_tree_iterator<std::pair<const std::__cxx11::basic_string<char>, float> >]’:
+ required from here
+ error: ‘min_element’ was not declared in this scope
+    return min_element(m.begin(), m.end(),
+
+ #+END_QUOTE
+
+*** The lifetime of auto declaration variables (objects) is within the scope where it's declared
+    - auto declaration: such as int i;
+    - a pair of bracket define a scope
+    - a variable declared as auto variable would not have guarantee to exist outside of its declaring scope!
+
+    [[ihttps://stackoverflow.com/questions/11137516/scope-vs-lifetime-of-variabled:][Scope vs. Lifetime of Variable]]
+
+    Also note that Python's scope is much simpler and more generous: only function and global are scopes,
+    the other code block is not scope, thus has no impact to the lifetime of Python object
+
+*** The lifetime of returned value
+    The return value from a function is temporary only guarantee to exist during the statement of calling the function.
+    Therefore the returned value should be assigned to an variable in order to extend or preserve the lifetime of the returned value.
+
+*** Enable core dump generation in Ubuntu
+
+    On terminal to execute the following:
+ #+BEGIN_SRC sh
+ ulimit -c unlimited
+  #+END_SRC
+
+ to have it permanent, put the command in ~/.profile
+
+*** Investigation of core dump file
+
+    gdb <executable> ./core
+
+*** To manipulate a vector as value keyed in a std::map
+
+    The address of the vector (pointer) instead of vector value must be used. Otherwise, it would not be the same vector, but a new instance
+    of empty vector.
+
+    Anything on the left hand-side or target of manipulation, must use pointer to the address, cannot be the value.
+
+    Note, to express a map from string to vector pointer should be as following:
+    map<string, vector<double>* > // not map<string, *vector<double> >
+
+*** Effective C++/C debug
+
+    As of 2017/9/6, see realgud entry: [[Debug in emacs]], as it's more user friendly than gdbtui.
+
+    Use gdbtui (GDB with GUI):
+    gdbtui <path-to-executable>
+
+    To enable cmake to setup for debug, use cmake-gui, select build type as Debug, then make on the command line.
+
+    Major command in GDB:
+    break <line number>
+    run to run the loaded program
+    continue to resume from breakpoint
+
+    display <variable-name> to auto show the value of the variable
+    print <variable-name> to show the value of the variable once; print *<pointer> (to show the data pointed by the pointer)
+
+    undisplay to remove all previously displayed variables.
+
+**** Passing arguments and rediction from standard input still works inside gdbtui
+
+  Pass the arguments to the run command from within gdb.
+
+  $ gdb ./a.out
+  (gdb) r arg1 arg2 < t
+  Starting program: /dir/a.out < t
+
+**** Typical workflow with GDB
+
+     1. Make
+     2. gdbtui <executable>
+     3. break <all interested line numbers>
+     4. r arg1 arg2 < <input_in_file>
+     5. examine at a breakpoint
+     6. continue, repeat step 5 (the previous)
+
+**** Running C++ program interactive with emacs/ubuntu
+     There are a few options:
+     1. Use cpp.sh (a web site, paste code to the code window and run). Note: when there is some crash, it may not report the error, such as segmentation fault, etc.
+     2. Use my own sandbox mechanism of tangle to ~/programming/cplusplus/sandbox/src/sandbox.cpp and run in command shell (Note, the command to tangle in spacemacs is <SPACE> u C-v C-t t, not to confusing with u without <SPACE> which is undo!
+     3. Use emacs org-babel executing code block, see https://emacs.stackexchange.com/questions/15065/org-mode-babel-interactive-code-block-evaluation
+     4. Use Jupyter C++ kernel, see http://shuvomoy.github.io/blog/programming/2016/08/04/Cpp-kernel-for-Jupyter.html for leads
+
+**** There is a way to construct vector literals in C++
+     For example,
+     vector<int> a_vector = {1, 2, 3} // This requires C++11
+      There might be way to use << operation, such as
+      vector<string> a_vector;
+      a_vector << "Hello" << "World"; // not verified.
+
+      Another to do it is via array initialization
+
+  static const int arr[] = {16,2,77,29};
+  vector<int> vec (arr, arr + sizeof(arr) / sizeof(arr[0]) );
+
+
+**** It's complicated to find length of a C++ array, use vector instead
+
+     int a[7];
+     std::cout << "Length of array = " << (sizeof(a)/sizeof(*a)) << std::endl;
+
+**** Use for (auto x:sequence) { <access code>}
+     To traverse the sequence, to avoid confusion and mistakes with iteration variable.
+
+**** Use C++11 for new and improved expressiveness
+
+**** With spacemacs, I found M-x gdb works for C++ debugging
+
+     - To set breakpoint C-x C-a C-b in a source code buffer
+     - To clear a breakpoint at the place of the breakpoint, C-x C-a C-d
+     - Restore multiple window layout:
+  If you ever change the window layout, you can restore the many-windows layout by typing M-x gdb-restore-windows . To toggle between the many windows layout and a simple layout with just the GUD interaction buffer and a source file, type M-x gdb-many-windows .
+  GDB User Interface Layout - GNU Emacs Manual - GNU.org
+  https://www.gnu.org/software/emacs/manual/.../emacs/GDB-User-Interface-Layout.html
+
+  - running again will automatically reload the updated binary.
+
+**** Build debug enabled executable from C++ source
+   at the root of the project:
+
+   cmake -DCMAKE_BUILD_TYPE=Debug build
+
+
+** Effective Python
+
+*** Use python-live-mode in emacs to visualize the execution
+
+    In the python-live-mode, all value assigned to a variable/label would be shown it's value at the moment of label reference.
+    It makes it quite clean of the program execution in terms of value changes.
+
+    python-live-mode can be started by keys 'l in python-mode in spacemacs.
+
+*** Avoid the trap of Python variable assignment
+
+ deepcopy needed to copy multi-dimension list,
+ Python's variable is just a label to data value.
+ For container type such as list, the assignment only adds one more label for the variable on the right side of assignment to the data value referred by the variable on the left side of the assignment!
+ Thus modifying using the either label would cause the same data value (container) to be modified!
+
+ The solution is use copy for one-dimensional list, or full list slicing [:]
+
+ For multiple dimension list, one has to use deepcopy to make actual data duplication.
+
+ It helps to refresh to the understanding of label semantics of Python variable:  http://python.net/~goodger/projects/pycon/2007/idiomatic/handout.html#python-has-names
+
+ Here is examples to illustrate the problems and solutions:
+
+ In the examples, I assume using python live-mode in emacs to visualize the exectution result.
+
+ #+NAME:assignment-semantics
+ #+BEGIN_SRC python :noweb yes :tangle :exports none
+   # Scalar assignment, the assignment has copy semantics
+   x = 1  # value 1 has a label x
+   y = x  # value 1 has another label y
+   y = y -1                        # the value referred by y has changed, subtracted by 1,
+   # it's a different value, no longer the same value as the one referred by x and y before.
+   # x still refers to the previous value
+   z = x
+   w = y                           # now y refers to a new value
+
+   # array, one dimension, assignment has no copy semantics:
+
+   x_array = [1, 2, 3]
+   y_array = x_array
+   y_array[0] = -1
+   z = x_array                     # The array value referred by x_array is also modified in the same way
+
+   # use list.copy for one dimension array to implement the copy semantics:
+
+   x_array = [1, 2, 3]             # the array [1, 2, 3] has a label x_array
+   y_array = x_array.copy()        # y_array refers to a new list, one dimensional copied from x_array, one dimensional
+   y_array[0] = -1                 # using the label, y_array, modify the value's element
+   z = x_array                     # I expect that value referred by x_array name would not be modified,
+   # as y_array now refers to a different value.
+   w = y_array                     # I expect the value referred by y_array name have the value modified
+
+   # For one dimensional list, use full extent list slicing would work as well as list.copy():
+   x_array = [1, 2, 3]
+   y_array = x_array[:]
+   y_array[0] = -1
+   z = x_array
+
+   # array, two dimensions, assignment has no copy semantics
+
+   x_array_array = [[1, 2, 3], [3, 2, 1]]
+   y_array_array = x_array_array
+   y_array_array[0][0] = -1
+   z = x_array_array               # the two-dimensional array value referred by x_array has been modified
+   w = y_array_array
+
+   # Try list.copy() for two dimensions array: (it has no real copy semantics, as it's just a shallow copy)
+
+   x_array_array = [[1, 2, 3], [3, 2, 1]]
+   y_array_array = x_array_array.copy()
+   y_array_array[0][0] = -1
+   z = x_array_array
+   w = y_array_array
+
+   #For multi-dimensions, deepcopy from copy module must be used to work :
+   from copy import deepcopy
+   x_array_array = [[1, 2, 3], [3, 2, 1]]
+   y_array_array = deepcopy(x_array_array)
+   y_array_array[0][0] = -1
+   print(x_array_array)
+   print(y_array_array)
+
+   # For 2-D list, using explicit slicing would be faster than deepcopy:
+   x_array_array = [[1, 2, 3], [3, 2, 1]]
+   y_array_array = [row[:] for row in x_array_array]
+   y_array_array[0][0] = -1
+   print(x_array_array)
+   print(y_array_array)
+
+
+
+   grid = [[0, 0],
+           [1, 0]]
+
+   a_copy = deepcopy(grid)
+
+   for x in range(len(a_copy)):
+     for y in range(len(a_copy[0])):
+       a_copy[x][y] = -1
+
+   x = grid
+ #+END_SRC
+
+ The moral of the story, in Python, assignment never makes a copy of the value referred by the name.
+ To copy, the action must be explicit.
+
+ #+RESULTS: assignment-semantics
+ : None
+
+*** The concept of variable/label scope in Python
+
+    Only function introduces new scope besides the global scope at the module/file level (variable/label assignment)
+
+    The other code block of if, for, etc. does not introduce new scope. The scope would be the same as the enclosing scope.
+    This seems simpler and different from C++, or Scala, even Clojure!
+
+*** List comprehension is functional, only provide values, but does not provide the modification side effect!
+
+    It's not possible to modify element in list comprehension, as illustrated by the following example:
+
+ #+NAME:verify-modification-by-list-comprehension
+ #+BEGIN_SRC python :noweb yes :tangle :exports none
+   expand = [1, 2, 3]
+
+   for cell in expand:
+       cell = cell * 2
+
+   x = expand
+
+   new_expand = [-1 for cell in expand]
+
+ #+END_SRC
+
+ In this example, expand was not modified. The first list comprehension, only produces the values of the doubles of the elements of expand.
+ But it does not change the elements of expand.
+
+ However, it's possible to use list comprehension to construct new value as the second list comprehension shows.
+ new_expand will have the same dimensions but all value would be -1.
+
+*** Debug Python code with pdb.set_trace()
+
+    import pdb
+
+    pdb.set_trace() // set break point at the location, when the program reach this location, it will enter debugger, then one can do the debug there.
+
+
+*** Good practice of always defining class attributes in __init__
+
+ Here is a test to see if I could have class member defined elsewhere other than __init__
+ Python does not care if one defines class members in non __init__
+
+ But it's a bad practice, as it might introduce the following problem, when accessing
+ a member, it may not have been created as it might be done in another function not yet called.
+
+ So it's a good discipline always define all members with initial value at __init__, as it
+ will be guaranteed to be called before all other methods.
+
+ #+NAME:
+ #+BEGIN_SRC python :noweb tangle :tangle
+   class Foo(object):
+       def __init__(self):
+           #self.x = 0
+           pass
+
+       def a(self):                # may not be called before calling self.b
+           self.x = 1
+
+       def b(self):
+           return self.x
+
+   foo = Foo()
+   # foo.a() # AttributeError: 'Foo' object has no attribute 'x'
+   b = foo.b()
+ #+END_SRC
+
+*** Note: 0 in Python is considered as False in logic evaluation
+
+ So
+ #+NAME:
+ #+BEGIN_SRC python :noweb tangle :tangle
+   light_waypoint = 273
+   state = 0
+   if light_waypoint and state:
+       print(1)
+   else:
+       print(2)
+
+
+ #+END_SRC
+ would always print 2, as light_waypoint and 0 evaluate to False
+ !!!
+
+*** Always check if a value could be None before comparing it with an arrary (numpy)
+
+ Python implementation may not like to have comparison between a value None and an array,
+ while a function obtained from polyfit might be represented as an array internally.
+ So the kosher way of coding should be:
+
+ #+NAME:
+ #+BEGIN_SRC python :noweb tangle :tangle
+ if pontential_None and (potential_None == an_numpy_array_representation)
+ #+END_SRC
+
+ #+BEGIN_EXAMPLE
+ The error message could be:
+ File "/usr/lib/python2.7/dist-packages/numpy/lib/polynomial.py", line 1203, in __eq__
+     if self.coeffs.shape != other.coeffs.shape:
+ AttributeError: 'NoneType' object has no attribute 'coeffs'
+ #+END_EXAMPLE
+
+
+*** Pecularity of Python
+    - Unique use of else
+      For in the context of try: except: else:
+      It will provide the code space for code block to be executed when there is no exception happens.
+      (Note, related in the context of try: except: finally:
+      below the finally
+      the code block will be executed if exception happens and after all exception treatment has been done.
+      )
+
+      There is another unique context to use else in loop:
+      The else-clause is executed when the while-condition evaluates to false.
+    -
+    - Note set('12345') has the following
+ assertEqual({ '1', '2', '3', '4', '5' }, set('12345'))
+
+ - Attributes names that start with a double underscore get mangled when an instance is created.
+   It must be accessed through placing prefix of its class name, for example,
+
+ #+NAME:
+ #+BEGIN_SRC python :noweb tangle :tangle
+   rover = Dog()
+   rover.__password()              # AttributeError
+   rover._Dog__password()          # worked!
+ #+END_SRC
+
+ - (1) == 1, but (1, ) is a tuple! and () is a tuple.
+
+ - tuple("abc") == ('a', 'b', 'c')
+
+ - Note, tuple value is immutable, but the label to a tuple can point a different tuple value!
+
+ - 0 is equivalent to None for Boolean value.
+
+ - For string formating, integer is not considered to be float:
+
+ If a format specifier is for float, if the corresponding value at the run time is of integer value,
+ then it would be an error as below.
+ To prevent the error message of "valueerror: precision not allowed in integer format specifier"
+ when the format specifier is for floating point, while the corresponding value at the run time happens
+ to be of integer. The solution is to cast the corresponding value to be float always.
+
+ The following is a solution as an example to illustrate.
+
+ #+NAME:log_update_state
+ #+BEGIN_SRC python :noweb tangle :tangle
+   def noneORfloat(y):
+       return y if y is None else float(y)
+
+   def log_update_state(car_index, light_index_or_last, if_RED, dist_to_light, min_stop_dist, current_velocity, comment):
+       label = ("car index {:4} " +
+                "light index {:4} " +
+                "curr. light color: {:7} " +
+                "dist. to light: {:7.2} " +
+                "min. stop dist. {:7.2} " +
+                "curr. vel. {:7.2}; " +
+                comment)
+       rospy.loginfo(label.format(car_index,
+                                  light_index_or_last,
+                                  if_RED,
+                                  noneORfloat(dist_to_light),
+                                  noneORfloat(min_stop_dist),
+                                  noneORfloat(current_velocity)))
+ #+END_SRC
+
+*** The goodness of iterator in Python
+  let it = iter(sequence)
+  It has next(it) that can more formally and easily by pass an element in a sequence, compared to directly iterate through the sequence.
+
+** To iterate through dictionary in Python
+
+ For Python 2, use
+ for key, val in dict.iteritems():
+
+ For Python 3,
+ for key val in dict.items():
+
+
+** Automate "sandwich" code pattern: with statement
+
+ For the following pattern of code:
+
+ #+NAME:sandwich
+ #+BEGIN_SRC python :noweb tangle :tangle
+   def count_lines(self, file_name):
+           try:
+               f = open(file_name)  # top sandwich
+               try:
+                   return len(f.readlines())  # middle sandwich
+               finally:            # bottom sandwich
+                   f.close()
+           except IOError:
+               # should never happen
+               self.fail()
+
+ #+END_SRC
+
+ Abstraction to capture the routine pattern of the top and bottom of "sandwich":
+
+ #+NAME:with-sandwich-top-bottom-abstraction
+ #+BEGIN_SRC python :noweb tangle :tangle
+   class FileContextManager():
+           def __init__(self, file_name):
+               self._file_name = file_name
+               self._file = None
+
+           def __enter__(self):    # sandwich top
+               self._file = open(self._file_name)
+               return self._file
+
+           def __exit__(self, cls, value, tb):  # sandwich bottom
+               self._file.close()
+
+       # Now we write:
+
+       def count_lines2(self, file_name):
+           with self.FileContextManager(file_name) as f:
+               return len(f.readlines())  # sandwich middle
+
+ #+END_SRC
+
+ For file open, Python provides built-in context manager.
+
+** Monkey Patching: it's possible to add methods to a defined class at the runtime in Python
+
+ For more details, see the Python Koans on "monkey patched"
+ #+NAME:original-class
+ #+BEGIN_SRC python :noweb tangle :tangle
+ class Dog(object):
+         def bark(self):
+             return "WOOF"
+
+ #+END_SRC
+
+ #+NAME:monkey-patching
+ #+BEGIN_SRC python :noweb tangle :tangle
+  def wag(self):
+      return "HAPPY"
+
+  self.Dog.wag = wag
+
+ #+END_SRC
+
+ But most built-in types (classes) can not be monkey patched. However, one can overcome the
+ limitation by subclassing the built-in classes, and add monkey patching to
+ the own subclass.
+
+ #+NAME:monkey-subclassing
+ #+BEGIN_SRC python :noweb tangle :tangle
+ class MyInt(int):
+         pass
+ self.MyInt.is_even = lambda self: (self % 2) == 0
+
+         self.assertEqual(False, self.MyInt(1).is_even())
+         self.assertEqual(True, self.MyInt(2).is_even())
+
+ #+END_SRC
+** Python's weak module access protection (gentleman's)
+
+ - use __all__ list to selectively open for import *
+
+ - use _ (underscore) prefix to close to import *
+
+ - use __ (double underscore) prefix to force to place _ClassName__attribute to access the attribute
