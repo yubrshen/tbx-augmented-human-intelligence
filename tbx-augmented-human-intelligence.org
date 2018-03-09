@@ -2,29 +2,53 @@
 
 * Introduction
 
-This is my collection of utilities to make my coding as well as a shell script more convenient and productive.
+This is my collection of know-how and utilities to make my coding as well as a shell script more convenient and productive.
 Another purpose is to limit the surface of my tool chains so that I can be productive.
 Ergonomically, the tool chain surface needs to be limited for human to master it comfortably and fluently.
+
+In this document, not only scripts will be produced but also sample code segment and instructions would be shown.
+This document embeds code with literate programming. The code can be generated
+from this document, if needed. But most of the time, the code servers as
+example, and illustration.
+
+There will be organized into groups. One of the groups will be file utilities,
+another group will be pre-processing for machine learning.
+
+They will be mostly higher-level wrappers of the existing libraries.
+This will serve the purpose of less memory overload.
+Using these groups of utilities you can reduce the need to remember numerous libraries.
+
+There may be many useful software libraries but I need to have effective entry
+point
+so that I can get my job done quickly reducing the load of memory and the load of searching the right tool.
+It is vitally important to have personal toolboxes to be productive, as one can be sure to be familiar with the toolbox.
+With these personal toolboxes, the API surface can be focused and limited to suit one's needs and habit.
+
 In broader sense, there should research and effort on how to augment human intelligence (AHI) with computation tools.
 For the purpose,
 ergonomic tool surface may be an interesting research area.
 
-In this document, not only scripts will be produced but also sample code segment and instructions would be shown.
-This document embeds code with literate programming. The code can be generated from this document.
+* Resolution between mindmap and org-mode
 
-There will be organized into groups. One of the groups will be file utilities, another group will be pre-processing for machine learning.
+I will use mindmap for knowledge acquisition at the top level, and for
+thought exploration purpose, as the 2D dimensions is still better than org-mode's mainly
+1D dimension.
 
-They will be mostly higher-level wrappers of the existing libraries. This will serve the purpose of less memory overload. Using these groups of utilities you can reduce the need to remember
- numerous libraries.
-There may be many useful libraries software but I need to have effective entry point so that I can get my job done quickly reducing the load of memory and the load of searching the right tool.
-It is vitally important to have personal toolboxes to be productive,  as one can be sure to be familiar with the toolbox.
-With these personal toolboxes, the API surface can be focused and limited to suit one's needs and habit.
+I will use org-mode for extensive narrative of text. I may use emacs text-mode for
+formatting some mindmap entries.
 
-I may use the Google's python-fire (https://github.com/google/python-fire)
-to ease the workload to convert python libraries into command line tools.
+The drawback of mindmap is that
 
+- it's still not possible to publish directly from mindmap.
+- it's hard to search the mindmaps.
+- it's much less effective to write large chunk of texts, without the auto
+  completion help that's available in emacs.
+- It's not possible to do version control effectively on mindmaps.
 
-
+The idea combination would be to use emacs org-mode as the medium, but make it
+possible to render and present the content of org-outline into mindmaps.
+It might be possible, like a mindmap viewer off emacs, like one can view PDF
+file in emacs.
 
 * Unsolved problems
 
@@ -35,7 +59,10 @@ Here are records of unresolved problems, to save repeating effort.
 I have lots of notes scatter in Freeplane files, org files, etc. I'd like to be able to search them for key words.
 For examples, I'd like to know the notes about "TensorFlow" in all my files.
 
-** Not able to view *.mov file on Ubuntu with VLC and totem
+I might write a wrapper utility to find all the files scatter, and then search
+in them.
+
+** Not able to view *.mov file on Ubuntu with VLC and totem: alternative solution: use mplayer
 
 For VLC, here is the error message:
 as of[2017-11-21 Tue 09:59]
@@ -52,9 +79,11 @@ The following with sudo would not evaluate with C-c C-c
 #+END_SRC
 
 #+RESULTS:
+: /home/yubrshen/programming/tbx-augmented-human-intelligence
 : 1
 
-The following is the way to execute commands with sudo in babel:
+The following is the way to execute commands
+"Evaluation of this shell code block is disabled" emacs babel with sudo in babel:
 #+NAME:
 #+BEGIN_SRC emacs-lisp
   (let ((default-directory "/sudo::"))
@@ -64,7 +93,7 @@ The following is the way to execute commands with sudo in babel:
 But I checked the file/link has aleardy existed:
 
 #+BEGIN_SRC shell
-  ls -lt /usr/lib/vdpau/libvdpau_nvidia.so.1
+Pybites.  ls -lt /usr/lib/vdpau/libvdpau_nvidia.so.1
 #+END_SRC
 
 #+RESULTS:
@@ -96,17 +125,6 @@ The problem with totem is simply just crash.
 
 The alternative of using mplayer to view the same file worked. So the case is closed for now,[2017-11-21 Tue 10:23]
 
-@ bash: the last argument of the previous command !$
-
-#+BEGIN_SRC shell
-#!/usr/bash
-echo "Hello"
-echo !$
-#+END_SRC
-
-#+RESULTS:
-| Hello |
-| !$    |
 
 * Handy Machine Learning and Data Science
 ** Pre-processing for machine learning
@@ -245,6 +263,14 @@ echo !$
  http://blog.kaggle.com/category/winners-interviews/
 
  https://distill.pub/
+
+** About GPU/Nvidia
+
+*** What is CUDA and cuDNN?
+      CUDA - API/Language to talk to the GPU.
+          CUDA is NVIDIA’s language/API for programming on the graphics card. I’ve found it to be the easiest way to write really high performance programs run on the GPU.  <https://developer.nvidia.com/cudnn>
+      cuDNN - library for Deep Learning using CUDA.
+          cuDNN is a library for deep neural nets built using CUDA. It provides GPU accelerated functionality for common operations in deep neural nets. You could use it directly yourself, but other libraries like TensorFlow already have built abstractions backed by cuDNN.
 
 
 * Handy software engineering
@@ -441,6 +467,284 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
    | /media/yubrshen/DATA/ai-study/sdc/term3/projects/ROS_pratcice/ROS-notes.mm                                                      |    |         |                   |          |            |     |             |
    | /media/yubrshen/DATA/ai-study/ShenzhenTransportProjectStudy.mm                                                                  |    |         |                   |          |            |     |             |
 
+
+** Shell scripts know-how
+
+*** cd - change to previous directory
+
+#+BEGIN_SRC shell
+pwd
+cd ~/tmp
+pwd
+cd - # expect to /home/yubrshen/programming/tbx-augmented-human-intelligence
+cd - # expect to ~/tmp
+#+END_SRC
+
+#+RESULTS:
+| /home/yubrshen/programming/tbx-augmented-human-intelligence |
+| /home/yubrshen/tmp                                          |
+| /home/yubrshen/programming/tbx-augmented-human-intelligence |
+| /home/yubrshen/tmp                                          |
+
+*** cd ~- and cd ~+
+
+~- as a general expression for the previous directory
+~+ as the current directory
+
+#+BEGIN_SRC shell
+  echo ~+                         # equivalent to pwd: /home/yubrshen/programming/tbx-augmented-human-intelligence
+  cd ~/tmp
+  echo ~-                         # show the previous directory: /home/yubrshen/programming/tbx-augmented-human-intelligence
+  echo ~+                         # pwd: /home/yubrshen/tmp
+  cd /tmp
+  echo ~+                         # pwd: /tmp
+  echo ~- # previous directory: /home/yubrshen/tmp
+#+END_SRC
+
+#+RESULTS:
+| /home/yubrshen/programming/tbx-augmented-human-intelligence |
+| /home/yubrshen/programming/tbx-augmented-human-intelligence |
+| /home/yubrshen/tmp                                          |
+| /tmp                                                        |
+| /home/yubrshen/tmp                                          |
+
+*** Difference between cd - and cd - > /dev/null
+ > /dev/null suppress output
+
+#+BEGIN_SRC shell
+cd ~/tmp
+cd -
+#+END_SRC
+
+#+RESULTS:
+: /home/yubrshen/programming/tbx-augmented-human-intelligence
+
+#+BEGIN_SRC shell
+cd - > /dev/null
+#+END_SRC
+
+#+RESULTS:
+
+*** Meaning of && in shell commands
+
+Continue, sequential execution
+
+#+BEGIN_SRC shell
+echo "Wish you" && echo " Happy New Year!"
+#+END_SRC
+
+#+RESULTS:
+| Wish  | you |       |
+| Happy | New | Year! |
+
+*** pwd and pwd -P
+
+#+BEGIN_SRC shell
+pwd
+#+END_SRC
+
+with -P just treat symbolic as ordinary path
+#+RESULTS:
+: /home/yubrshen/programming/tbx-augmented-human-intelligence
+#+BEGIN_SRC shell
+pwd -P
+#+END_SRC
+with -P translate symbolic link into physical file
+#+RESULTS:
+: /media/yubrshen/DATA/programming/tbx-augmented-human-intelligence
+
+*** Putting command outcome to an variable
+
+#+BEGIN_SRC shell
+  date=`date`
+  echo $date
+#+END_SRC
+
+#+RESULTS:
+: Sat Dec 30 15:39:30 PST 2017
+
+The same as above to collect output of command:
+#+BEGIN_SRC shell
+data="$(date)"
+echo $data
+#+END_SRC
+
+#+RESULTS:
+: Sat Dec 30 18:04:25 PST 2017
+
+Create a test script to show the meaning of $0
+$0 is the full path of the script.
+
+#+BEGIN_SRC shell
+echo 'echo "here is the  full path of script: " "$0"  ' > ~/tmp/tmp.sh
+echo 'echo "and here is the folder of the script: " "$(dirname "$0")"' >> ~/tmp/tmp.sh
+chmod u+x ~/tmp/tmp.sh
+~/tmp/tmp.sh
+#+END_SRC
+
+#+RESULTS:
+| here | is   | the | full | path   | of | script: | /home/yubrshen/tmp/tmp.sh |                    |
+| and  | here | is  | the  | folder | of | the     | script:                   | /home/yubrshen/tmp |
+
+Putting the pieces together:
+
+1. Extract the folder of the path.
+#+BEGIN_SRC shell
+A_FULL_PATH="/home/yubrshen/tmp/tmp.sh"
+echo $A_FULL_PATH
+THIS_DIR="$(dirname $A_FULL_PATH)"
+echo $THIS_DIR
+#+END_SRC
+
+#+RESULTS:
+| /home/yubrshen/tmp/tmp.sh |
+| /home/yubrshen/tmp        |
+
+2. Use the extracted folder to change into that folder.
+#+BEGIN_SRC shell
+A_FULL_PATH="/home/yubrshen/tmp/tmp.sh"
+echo $A_FULL_PATH
+THIS_DIR="$(cd "$(dirname $A_FULL_PATH)")"
+echo "THIS_DIR: " $THIS_DIR
+#+END_SRC
+
+#+RESULTS:
+| /home/yubrshen/tmp/tmp.sh |
+| THIS_DIR:                 |
+
+1. Then capture the folder path from pwd -P
+This would provide the absolute path throug pwd -P, but "$(dirname "$0")" would only provide the relative path
+#+BEGIN_SRC shell
+A_FULL_PATH="/home/yubrshen/tmp/tmp.sh"
+echo $A_FULL_PATH
+THIS_DIR="$(cd "$(dirname $A_FULL_PATH)" && pwd -P)"
+echo "THIS_DIR: " $THIS_DIR
+#+END_SRC
+
+#+RESULTS:
+| /home/yubrshen/tmp/tmp.sh |                    |
+| THIS_DIR:                 | /home/yubrshen/tmp |
+
+4. Then change back to the previous folder before changing into the folder.
+#+BEGIN_SRC shell
+A_FULL_PATH="/home/yubrshen/tmp/tmp.sh"
+echo $A_FULL_PATH
+THIS_DIR="$(cd "$(dirname $A_FULL_PATH)" && pwd -P && cd - > /dev/null)"
+echo "THIS_DIR: " $THIS_DIR
+pwd
+#+END_SRC
+
+#+RESULTS:
+| /home/yubrshen/tmp/tmp.sh                                   |                    |
+| THIS_DIR:                                                   | /home/yubrshen/tmp |
+| /home/yubrshen/programming/tbx-augmented-human-intelligence |                    |
+
+5. Use the captured folder name to construct a file path
+#+BEGIN_SRC shell
+A_FULL_PATH="/home/yubrshen/tmp/tmp.sh"
+echo $A_FULL_PATH
+THIS_DIR="$(cd "$(dirname $A_FULL_PATH)" && pwd -P && cd - > /dev/null)"
+echo "THIS_DIR: " $THIS_DIR
+USER_PROFILE="$THIS_DIR/profile.tmp"
+echo $USER_PROFILE
+#+END_SRC
+
+#+RESULTS:
+| /home/yubrshen/tmp/tmp.sh      |                    |
+| THIS_DIR:                      | /home/yubrshen/tmp |
+| /home/yubrshen/tmp/profile.tmp |                    |
+
+6. Check the existence of the file
+
+#+BEGIN_SRC shell
+  A_FULL_PATH="/home/yubrshen/tmp/tmp.sh"
+  echo $A_FULL_PATH
+  THIS_DIR="$(cd "$(dirname $A_FULL_PATH)" && pwd -P && cd - > /dev/null)"
+  echo "THIS_DIR: " $THIS_DIR
+  USER_PROFILE="$THIS_DIR/profile.tmp"
+  echo $USER_PROFILE
+  if [ ! -f "$USER_PROFILE" ];
+     then
+     echo "What is the full path to your Unity simulator?"
+  fi
+#+END_SRC
+
+#+RESULTS:
+| /home/yubrshen/tmp/tmp.sh      |                    |     |      |      |    |      |       |            |
+| THIS_DIR:                      | /home/yubrshen/tmp |     |      |      |    |      |       |            |
+| /home/yubrshen/tmp/profile.tmp |                    |     |      |      |    |      |       |            |
+| What                           | is                 | the | full | path | to | your | Unity | simulator? |
+
+7. Read from terminal from user input
+#+BEGIN_SRC shell
+  A_FULL_PATH="/home/yubrshen/tmp/tmp.sh"
+  echo $A_FULL_PATH
+  THIS_DIR="$(cd "$(dirname $A_FULL_PATH)" && pwd -P && cd - > /dev/null)"
+  echo "THIS_DIR: " $THIS_DIR
+  USER_PROFILE="$THIS_DIR/profile.tmp"
+  echo $USER_PROFILE
+  if [ ! -f "$USER_PROFILE" ];
+     then
+     echo "What is the full path to your Unity simulator?"
+     read unity_path
+     echo $unity_path
+  fi
+#+END_SRC
+
+#+RESULTS:
+| /home/yubrshen/tmp/tmp.sh      |                    |     |      |      |    |      |       |            |
+| THIS_DIR:                      | /home/yubrshen/tmp |     |      |      |    |      |       |            |
+| /home/yubrshen/tmp/profile.tmp |                    |     |      |      |    |      |       |            |
+| What                           | is                 | the | full | path | to | your | Unity | simulator? |
+|                                |                    |     |      |      |    |      |       |            |
+
+As I don't know how to execute the shell with input, the following script needs to be executed at a terminal prompt to test.
+
+#+BEGIN_SRC shell
+  echo 'echo "Please input your name:"' > ~/tmp/prompt-input-tmp.sh
+  echo 'read name' >> ~/tmp/prompt-input-tmp.sh
+  echo 'echo $name' >> ~/tmp/prompt-input-tmp.sh
+  chmod u+x ~/tmp/prompt-input-tmp.sh
+  ls -lt ~/tmp/prompt-input-tmp.sh
+  # cat ~/tmp/prompt-input-tmp.sh
+  script=$(cat ~/tmp/prompt-input-tmp.sh)
+  echo $script
+#+END_SRC
+
+#+RESULTS:
+
+By executing the generated the script, here is the trace of the execution:
+
+#+BEGIN_QUOTE
+$ ~/tmp/prompt-input-tmp.sh
+Please input your name:
+Jonah
+Jonah
+#+END_QUOTE
+
+Get one line of content from a file to a variable
+
+#+BEGIN_SRC shell
+  script=$(cat ~/tmp/prompt-input-tmp.sh)
+  echo $script
+#+END_SRC
+
+#+RESULTS:
+: Please input your name:
+
+*** bash: the last argument of the previous command !$
+
+ #+BEGIN_SRC shell
+#!/usr/bash
+echo "Hello"
+echo !$
+ #+END_SRC
+
+ #+RESULTS:
+ | Hello |
+ | !$    |
+
+
 ** Effective with git (github)
 
 *** To be able to access new branches in remote repository that I have cloned from
@@ -468,6 +772,19 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
  tl_detector_sj is the name of the remote branch.
  merge-from-tl-detector-sj is the name of the local branch corresponding
 
+*** Adding a local existing project to GitHub
+
+1. Create a new repository on GitHub. ...
+2. Open TerminalTerminalGit Bash.
+3. Change the current working directory to your local project.
+4. Initialize the local directory as a Git repository. ...
+5. Add the files in your new local repository. ...
+6. Commit the files that you've staged in your local repository.
+7. Execute a script at the directory of the project to be added, for example, add-new-repository predict-stop-sign-slant-angle
+
+   The script add-new-repository is written by me. It takes an argument of the
+   name of the repository newly created on GitHub.
+
 *** Access github without username and password
 
     The key is to define the remote origin in the fashion working with ssh.
@@ -483,26 +800,26 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
     one has to use ssh!
 
 
-**** Shell script to add to a new github repository
+*** Shell script to add to a new github repository
 
-   The following script performs the initial upload of a local repository to a newly created github repository.
-   The resulted script is in "~/bin/add-new-repository"
+  The following script performs the initial upload of a local repository to a newly created github repository.
+  The resulted script is in "~/bin/add-new-repository"
 
-   The script's execution permission need to be changed after tangled.
+  The script's execution permission need to be changed after tangled.
 
-   #+BEGIN_SRC sh
+  #+BEGIN_SRC sh
      chmod 704 ~/bin/add-new-repository
-   #+END_SRC
+  #+END_SRC
 
-   The following is an example of the execution.
-   #+BEGIN_SRC sh
+  The following is an example of the execution.
+  #+BEGIN_SRC sh
      add-new-repository write-slides-with-jupyter
-   #+END_SRC
+  #+END_SRC
 
-   It must have one argument of the name of the repository.
+  It must have one argument of the name of the repository.
 
-   #+NAME:add-new-repository
-   #+BEGIN_SRC python :noweb yes :tangle ~/bin/add-new-repository :exports none
+  #+NAME:add-new-repository
+  #+BEGIN_SRC python :noweb yes :tangle ~/bin/add-new-repository :exports none
      #!/home/yubrshen/miniconda3/bin/python
      from subprocess import call
      import sys
@@ -514,30 +831,30 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
      action = "add" # for initial setup origin url
      call(["git", "remote", action, "origin", url])  # this works!
      call(["git", "push", "origin", "master"])
-   #+END_SRC
+  #+END_SRC
 
-   Note: to have the command line arguments working, each parameter separated by space
-   must be a separated element in the array.
+  Note: to have the command line arguments working, each parameter separated by space
+  must be a separated element in the array.
 
-**** Shell script to clone a repository with ssh setup
-   The following script performs git clone a repository but with ssh setup for the repository.
-   The resulted script is in "~/bin/git-clone-with-ssh"
+*** Shell script to clone a repository with ssh setup
+  The following script performs git clone a repository but with ssh setup for the repository.
+  The resulted script is in "~/bin/git-clone-with-ssh"
 
-   The script's execution permission need to be changed after tangled.
+  The script's execution permission need to be changed after tangled.
 
-   #+BEGIN_SRC sh
+  #+BEGIN_SRC sh
      chmod 704 ~/bin/git-clone-with-ssh
-   #+END_SRC
+  #+END_SRC
 
-   The following is an example of the execution.
-   #+BEGIN_SRC sh
-   git-clone-with-ssh https://github.com/yubrshen/CarND-Path-Planning-Project
-   #+END_SRC
+  The following is an example of the execution.
+  #+BEGIN_SRC sh
+   git-clone-with-ssh CarND-Path-Planning-Project
+  #+END_SRC
 
-   It must have one argument of the name of the repository.
+  It must have one argument of the name of the repository.
 
-   #+NAME:git-clone-with-ssh
-   #+BEGIN_SRC python :noweb yes :tangle ~/bin/git-clone-with-ssh :exports none
+  #+NAME:git-clone-with-ssh
+  #+BEGIN_SRC python :noweb yes :tangle ~/bin/git-clone-with-ssh :exports none
      #!/home/yubrshen/miniconda3/bin/python
      from subprocess import call
      import sys
@@ -550,7 +867,7 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
      url = user_host + sys.argv[1] + ".git"
      # git remote set-url origin git@github.com:username/your-repository.git
      call(["git", "remote", "set-url", "origin", url])
-   #+END_SRC
+  #+END_SRC
 
 *** Typical merge to remote branch
 
@@ -591,6 +908,22 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
  https://github.com/yubrshen/write-slides-with-jupyter
 
 ** Effective with Emacs
+
+*** Set to variable that is yet to be loaded (defined)
+
+#+NAME:
+#+BEGIN_SRC emacs-lisp
+(with-eval-after-load 'anaconda-mode
+    (add-to-list 'python-shell-extra-pythonpaths "/media/yubrshen/DATA/programming/python/sandbox")
+    (add-to-list 'python-shell-extra-pythonpaths "/media/yubrshen/DATA/programming/python/")
+    )
+#+END_SRC
+
+python-shell-extra-pythonpaths is defined in anaconda-mode, just doing
+(add-to-list 'python-shell-extra-pythonpaths "/media/yubrshen/DATA/programming/python/sandbox")
+would resulting "Symbol’s value as variable is void: python-shell-extra-pythonpaths" as anaconda-mode has not been loaded.
+
+But use the above expression, it will execute the operation after anaconda-mode is loaded.
 
 *** Disable undersore-to-subscript in org-mode export
     Have the option in the org-mode file:
@@ -698,6 +1031,21 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
  #+END_EXAMPLE
 
  Note the figure might be captured through screenshot!
+
+
+*** Do screenshot and insert the captured
+
+    1. Show the desired image to be captured
+    2. In the point of the butter to insert the screenshot, excute M-x org-download-screenshot
+    3. Use the appearing mouse cross-hair pointer to select the screen area to
+       be captured.
+
+       Here is an example:
+
+
+#+DOWNLOADED: /tmp/screenshot.png @ 2018-02-20 11:46:40
+[[file:Handy software engineering/screenshot_2018-02-20_11-46-40.png]]
+
 
 *** Permanently, and globally change the margin of org export to PDF
 
@@ -826,7 +1174,10 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
  setxkbmap -layout us -option ctrl:nocaps
  https://askubuntu.com/questions/33774/how-do-i-remap-the-caps-lock-and-ctrl-keys
 
-*** Caution: with emacs/babel
+ Here is some command that it might be useful. (It's pasetd at the wrong place.
+ I don't know if it's still useful.)
+
+setxkbmap -device 15 us
 
 *** Don't run long running application from emacs babel code block, it might block emacs itself.
 
@@ -844,18 +1195,128 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
  Place the following at the top of the org file, as per file variable:
  # -*- org-export-babel-evaluate: nil -*-
 
+*** Solve the problem of not able to execute code block in org-mode
+
+    Sometimes, after upgrading emacs packages (probably some org-contrib packages, it would no longer
+possible to execute code block with C-c C-c it would have the error of: "evaluation of code-blocks is disabled"
+
+The current solution is to execute M-x spacemacs/recompile-elpa after an upgrade, it took a long time, but it
+indeed solved the problem.
+
+IT IS A GOOD PRACTICE TO RECOMPILE THE EMACS FILES by M-x spacemacs/recompile-elpa
+
+
+*** Example of typesetting multiline equation with big brackets
+Actually, a better example, would be:
+\begin{eqnarray}
+\label{eq:1}
+ &  & \\
+\end{eqnarray
+
+\begin{equation*}\label{eq:lda}
+\begin{aligned}
+p(W_{d,n}, Z_{d,n}, for \ n \in \{1, \dots, N \},
+\theta_d, for \ d \in \{1, \dots, D \},
+\beta_k, for \ k \in \{1, \dots, K \}, \alpha, \eta) = \\
+\left( \prod_{d=1}^D p(\theta_d | \alpha)
+\left( \prod_{n=1}^N p(Z_{d,n} | \theta_d) p(W_{d,n} | Z_{d,n}, \beta_1, \dots, \beta_K) \right)
+ \right)
+\bigg(\prod_{k=1}^K p(\beta_k | \eta)\bigg)
+\end{aligned}
+\end{equation*}
+
+*** To prevent linked files from being embedded of org-mode file when exported to PDF
+
+    Use C-u C-c C-l (or Space u C-c C-l in spacemacs) with non-empty
+    description.
+
+
+*** To have org-capture to place the todo's into a specific files, one has to set the proper value of org-default-notes-file,
+    otherwise, the system might place new notes.org in the current directory
+    where the capture was happening. I explicitly set the following:
+    #+BEGIN_SRC emacs-lisp
+(setq org-directory "~/zoom-out")
+(setq org-default-notes-file (os-path (concat org-directory "/" "notes.org")))
+    #+END_SRC
+    It works.
+
+*** To have todo items showing up in the org agenda view, the value of org-agenda must be properly set.
+    The org file that contains those todo items must be in the list as the value
+    to org-agenda.
+
+    Currently, the following works:
+    #+BEGIN_SRC emacs-lisp
+    (setq org-agenda-files (list org-default-notes-file
+                             (os-path "~/Dropbox/schedule.org")))
+    #+END_SRC
+
+
+*** Proper value of :noweb in org-babel
+
+    I ran into situation when use the value of tangle for :noweb when the code
+    block is nested in the third level, the code block was not tangled in the
+    source code. But using yes as value, then the problem is gone.
+
+    It seems that this is a bug. That I should report.
+
+    So the moral of the story is that use I should use no-export instead of
+    tangle to achieve my desired effect: to tangle and evaluate, but do not
+    export.
+
+    Here is the relevant document:
+    https://orgmode.org/manual/noweb.html
+    no Default. No expansion of Noweb syntax references in the body of the code when evaluating, tangling, or exporting.
+    yes Expansion of Noweb syntax references in the body of the ‘src’ code block when evaluating, tangling, or exporting.
+    tangle Expansion of Noweb syntax references in the body of the ‘src’ code block when tangling. No expansion when evaluating or exporting.
+    no-export Expansion of Noweb syntax references in the body of the ‘src’ code block when evaluating or tangling. No expansion when exporting.
+    strip-export Expansion of Noweb syntax references in the body of the ‘src’ code block when expanding prior to evaluating or tangling. Removes Noweb syntax references when exporting.
+    eval Expansion of Noweb syntax references in the body of the ‘src’ code block only before evaluating.
+
+
+*** How to add additional packages with modern_emacs setup with spacemacs
+
+    There are two ways to do it:
+    1. Add in the file .spacemacs.d/init.el in the list of packages for
+       spacemacs-additional-packages. This only works for package that does not
+       require any configuration.
+    2. For package requiring configuration, it can be added in
+       .spacemacs.d/layers/config/packages.el put the new package in the list
+       for the value of config-packages, and then provide the function to
+       configure the new package in terms of
+       #+BEGIN_SRC emacs-lisp
+(defun config/init-<package-name>-config ()
+  (use-package <package-name>
+    :after <dependency>
+    :init (progrn
+           )
+    :config (progn
+              )))
+       #+END_SRC
+
+
+*** Address the error message of "Evaluation of code disabled" when C-C-c executing code in org-mode
+
+    With spacemacs, after upgrading packages, this may happen. The solution is
+    to execute M-x spacemacs/recompile-elpa
+
+    Only compile ob-core.el didn't help.
+
+    For details, see here:
+    https://github.com/syl20bnr/spacemacs/issues/7641
+
+
+*** Search string in a whole directory: <space>/
+
+    This will show all the line with the text searched.
+
 ** Effective with web browsing
 
-** Cycle through tabs in Chrome browser
+*** Cycle through tabs in Chrome browser
 
-   Ctrl+SHIFT+TAB
+    Ctrl+SHIFT+TAB
 
-** Switch to previous tab in Chrome browser
-   Allt+w (with a plugging installed)
-
-** Effective regular expression building and testing
-
-  Here is an effective tool to build and validate regular expression. Make sure to select Javascript (not Php) as language to be closer to C++, and others.
+*** Switch to previous tab in Chrome browser
+    Allt+w (with a plugging installed)
 
 ** Effective in programming
 
@@ -869,6 +1330,61 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
 
     - Make notes of the domain model of the program while tracking the code paths
 
+*** Programming: Promptly and early return: a way to simplify if then else enclosing hierarchy:
+
+  The following code illustrates the technique to reduce excessive levels of if else enclosing. The alternative
+  would have been use if then else all the way.
+
+  The pros of this approach is that the code would be shorter.
+
+  The cons is that when the code is indeed long, the context of the logic ("else" assumption would be lost, hard to read the code.)
+  For this context, needs comment to remind the fact.
+
+  That is, use comment to replace the else statement.
+  #+NAME:
+  #+BEGIN_SRC python :noweb tangle :tangle
+   # triangle(a, b, c) analyzes the lengths of the sides of a triangle
+   # (represented by a, b and c) and returns the type of triangle.
+   #
+   # It returns:
+   #   'equilateral'  if all sides are equal
+   #   'isosceles'    if exactly 2 sides are equal
+   #   'scalene'      if no sides are equal
+   #
+   # The tests for this method can be found in
+   #   about_triangle_project.py
+   # and
+   #   about_triangle_project_2.py
+   #
+   def triangle(a, b, c):
+       def test_two_sides(a, b, c):
+           if ((a + b) <= c):
+               raise(TriangleError)
+
+           if (a == b):            # already legal sides
+               if (c == a):
+                   return 'equilateral'
+               else:
+                   return 'isosceles'
+           else:
+               return None
+       if (a <= 0) or (b <= 0) or (c <= 0):
+           raise(TriangleError)
+       # below all sides are positive now
+       result = test_two_sides(a, b, c) or test_two_sides(a, c, b) or test_two_sides(b, c, a)
+       return result if result else 'scalene'
+
+   # Error class used in part 2.  No need to change this code.
+   class TriangleError(StandardError):
+       pass
+
+  #+END_SRC
+
+*** Effective regular expression building and testing
+
+   Here is an effective tool to build and validate regular expression.
+   Make sure to select Javascript (not Php) as language to be closer to C++, and others.
+j
 
 ** Effective use of HackerRank drill page
 
@@ -883,6 +1399,39 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
  9. Run Code to find out the difference between the output  and the expected
  10. Only as last resort, copy all the code including main to emacs buffer and run the tests locally.
 
+
+** The understanding of "leap" year, a challenge in HackerRank
+
+In the Gregorian calendar three criteria must be taken into account to identify leap years:
+
+1. The year can be evenly divided by 4, is a leap year, unless:
+2. The year can be evenly divided by 100, it is NOT a leap year, unless:
+3. The year is also evenly divisible by 400. Then it is a leap year.
+
+This means that in the Gregorian calendar, the years 2000 and 2400, 1992 are leap
+years,
+while 1800, 1900, 2100, 2200, 2300 and 2500 are NOT leap years.
+
+The rules can be simplified as follows:
+1. Divisible by 400, or
+2. Not divisible by 100, but by 4.
+
+The above rules are designed to add approximately appropriate days to compensate
+that the actual a year's length is 365.245 days. For the scale of 10,000 years,
+the above rules would nearly compensate the missing 0.245 days * 10,000 years =
+2450 days.
+
+It's tricky to interpret the meaning. The following implementation is correct.
+#+NAME:leap-year
+#+BEGIN_SRC python :noweb no-export :tangle
+leap = ((((year % 4) == 0) and (year % 100 != 0))
+        # divisible by 4 unless divisible by 100
+        or
+        (((year % 4) == 0) and ((year % 400) == 0)))
+        # divisible by 4 and divisible by 400 (of course divisible by 100)
+#+END_SRC
+
+
 ** Effective in shell
 
 
@@ -895,18 +1444,35 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
  Here is the repository for when-changed to install:
  https://github.com/joh/when-changed
 
-** Positional shell command arguments
- If some_program were a bash shell script, we could read each item on the command line because the positional parameters contain the following:
- $0 would contain "some_program"
- $1 would contain "word1"
- $2 would contain "word2"
- $3 would contain "word3"
+*** Positional shell command arguments
+  If some_program were a bash shell script, we could read each item on the command line because the positional parameters contain the following:
+  $0 would contain "some_program"
+  $1 would contain "word1"
+  $2 would contain "word2"
+  $3 would contain "word3"
 
- #+BEGIN_SRC shell :tangle "~/bin/vedio-play.sh"
+  #+BEGIN_SRC shell :tangle "~/bin/vedio-play.sh"
    #!/bin/bash
    # this is the command to view a *.mov file, working in Ubuntu 16.04
    mplayer -vo vdpau $1 # ~/tmp/potential_bug.mov
- #+END_SRC
+  #+END_SRC
+
+
+*** Capture shell output to a file
+
+  Sometimes just redirect the standard output may not work. I don't know why.
+
+  #+BEGIN_SRC shell
+ rostopic echo /rosout > rosout.log
+  #+END_SRC
+
+  But the following seemed working:
+
+  #+BEGIN_SRC shell
+ rostopic echo /rosout &>> rosout.log
+  #+END_SRC
+
+  This one capture all including standard error, as well as standard output, and it captures by appending.
 
 ** Effective with Ubuntu
 
@@ -997,35 +1563,35 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
 
    #+RESULTS:
 
-** Remove applications from startup in Ubuntu 16.04
+*** Remove applications from startup in Ubuntu 16.04
 
- #+BEGIN_SRC shell
+  #+BEGIN_SRC shell
    cd ~/.config/autostart/
    # remove the start up file for the application
    # for example
    mv skypeforlinux.desktop skypeforlinux.desktop.bak
- #+END_SRC
-** Knowledge bites
+  #+END_SRC
 
-*** What is CUDA and cuDNN?
-      CUDA - API/Language to talk to the GPU.
-          CUDA is NVIDIA’s language/API for programming on the graphics card. I’ve found it to be the easiest way to write really high performance programs run on the GPU.  <https://developer.nvidia.com/cudnn>
-      cuDNN - library for Deep Learning using CUDA.
-          cuDNN is a library for deep neural nets built using CUDA. It provides GPU accelerated functionality for common operations in deep neural nets. You could use it directly yourself, but other libraries like TensorFlow already have built abstractions backed by cuDNN.
 
+*** Setup for screencast with vokoscreen
+
+  1. To record voice, after click on Audio, must select Pulse and select both Monitor of Built-in Audio Analog Stero, and Built-in Audio Analog Stero
+  2. To play back must use OpenShot. Totem nor vlc works. But banshee, and Gnome mplayer work.
+  3. For video capture, click on the webcam, muse use the default settings (Frame: 25; Videocodec: libx264; Format: mkv; Audiocodec: libmp3lame
+  4. For the position of the video image, one may be able to arrange, but to make the video visible, it must be part of the screen capture area.
 ** Upgrade freeplane
 
  After downloading the latest from https://sourceforge.net/projects/freeplane/files/latest/download
  #+BEGIN_SRC shell
    cd ~/bin
    rm freeplane.sh
-   ln -s freeplane-1.6.10/freeplane.sh freeplane.sh
+   ln -s freeplane-1.6.12/freeplane.sh freeplane.sh
  #+END_SRC
 
  #+RESULTS:
 
- The version of freeplane-1.6.10 has a problem of misplacement of cursor, when editing node with \latex format.
- The problem is with 1.6.3, .7, 10. The work-around is to edit with \latex first, then after completion, add \latex
+ The version of freeplane-1.6.10 has a problem of latex editor, with misplacement of cursor, when editing node with \latex format.
+ The problem is with 1.6.3, .7, 10, 11. The work-around is to edit without \latex first, then after completion, add \latex
 
  #+RESULTS:
 
@@ -1036,156 +1602,6 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
 
  #+RESULTS:
  : lrwxrwxrwx 1 yubrshen yubrshen 28 Nov 22 21:02 /home/yubrshen/bin/freeplane.sh -> freeplane-1.6.3/freeplane.sh
-
-
-** Setup for screencast with vokoscreen
-
- 1. To record voice, after click on Audio, must select Pulse and select both Monitor of Built-in Audio Analog Stero, and Built-in Audio Analog Stero
- 2. To play back must use OpenShot. Totem nor vlc works. But banshee, and Gnome mplayer work.
- 3. For video capture, click on the webcam, muse use the default settings (Frame: 25; Videocodec: libx264; Format: mkv; Audiocodec: libmp3lame
- 4. For the position of the video image, one may be able to arrange, but to make the video visible, it must be part of the screen capture area.
-
-** Keyboard improvement
-
- The problems:
-
- - Esc key is too far away, not convenient to access. With spacemacs,
- it's used very often. Binding it to ,, works most of the time, but not always.
- (It's a minor problem with ,, bound for esc.)
-
- - Control key on the left is not convenient to access. It's no longer possible to ctrl-x with one hand with Dvorak keyboard.
- (A potential solution is to use palm to press it.)
-
- Potential solutions:
-
- - Esc:
-   - bound to CAPSLOCKS
-   - bind shift-CAPSLOCKS for CAPSLOCKS
-   - bound to ,,
-   - bind control to esc
-
- - Control key
-   - use palm to press it
-   - use xcape to bind to long press CAPSLOCKS for left control key
-   - use xcape to bind to long press Enter for the right control key
-   - bind esc to control key
-
- Map CAPSLOCKS to control and escape both:
-
- http://tiborsimko.org/capslock-escape-control.html
-
- #+BEGIN_SRC shell
- # make CapsLock behave like Ctrl:
- setxkbmap -option ctrl:nocaps
-
- # make short-pressed Ctrl behave like Escape:
- xcape -e 'Control_L=Escape'
- #+END_SRC
-
- #+RESULTS:
-
- Troubleshooting
- If the CapsLock key gets "stuck" and produces say uppercase letter combinations instead of lowercase ones,
- the easiest way to remove xcape mapping is to revert CapsLock key function via xmodmap:
-
- #+BEGIN_SRC shell0
- xmodmap -e 'keycode 0x42 = Caps_Lock'
- #+END_SRC
- followed by re-running of the keyboard modification script.
-
- More elaborate configuration example:
-
- #+BEGIN_SRC shell
- # set internal keyboard layout:
- deviceid=$(xinput -list | grep 'AT .* keyboard' | head -1 | grep -oE 'id=[0-9]+' | sed 's/id=//g')
- if [ "${deviceid}" != "" ]; then
-     setxkbmap -device "${deviceid}" dvorak
-     setxkbmap -device "${deviceid}" -option ctrl:nocaps # make CapsLock behave like Ctrl
- fi
-
- # set Kinesis keyboard layout:
- for deviceid in $(xinput -list | grep ' HID ' | grep -oE 'id=[0-9]+' | sed 's/id=//g'); do
-     if [ "${deviceid}" != "" ]; then
-         setxkbmap -device "${deviceid}" us # 'us' but it means 'dvorak' actually due to Kinesis
-         setxkbmap -device "${deviceid}" -option ctrl:nocaps # make CapsLock behave like Ctrl
-     fi
- done
- #+END_SRC
-
- #+BEGIN_SRC shell
- deviceid=$(xinput -list | grep 'AT .* keyboard' | head -1 | grep -oE 'id=[0-9]+' | sed 's/id=//g')
- echo $deviceid
-
- #+END_SRC
-
- #+RESULTS:
- : 15
-
-** Programming: Promptly and early return: a way to simplify if then else enclosing hierarchy:
-
- The following code illustrates the technique to reduce excessive levels of if else enclosing. The alternative
- would have been use if then else all the way.
-
- The pros of this approach is that the code would be shorter.
-
- The cons is that when the code is indeed long, the context of the logic ("else" assumption would be lost, hard to read the code.)
- For this context, needs comment to remind the fact.
-
- That is, use comment to replace the else statement.
- #+NAME:
- #+BEGIN_SRC python :noweb tangle :tangle
-   # triangle(a, b, c) analyzes the lengths of the sides of a triangle
-   # (represented by a, b and c) and returns the type of triangle.
-   #
-   # It returns:
-   #   'equilateral'  if all sides are equal
-   #   'isosceles'    if exactly 2 sides are equal
-   #   'scalene'      if no sides are equal
-   #
-   # The tests for this method can be found in
-   #   about_triangle_project.py
-   # and
-   #   about_triangle_project_2.py
-   #
-   def triangle(a, b, c):
-       def test_two_sides(a, b, c):
-           if ((a + b) <= c):
-               raise(TriangleError)
-
-           if (a == b):            # already legal sides
-               if (c == a):
-                   return 'equilateral'
-               else:
-                   return 'isosceles'
-           else:
-               return None
-       if (a <= 0) or (b <= 0) or (c <= 0):
-           raise(TriangleError)
-       # below all sides are positive now
-       result = test_two_sides(a, b, c) or test_two_sides(a, c, b) or test_two_sides(b, c, a)
-       return result if result else 'scalene'
-
-   # Error class used in part 2.  No need to change this code.
-   class TriangleError(StandardError):
-       pass
-
- #+END_SRC
-
-** Capture shell output to a file
-
- Sometimes just redirect the standard output may not work. I don't know why.
-
- #+BEGIN_SRC shell
- rostopic echo /rosout > rosout.log
- #+END_SRC
-
- But the following seemed working:
-
- #+BEGIN_SRC shell
- rostopic echo /rosout &>> rosout.log
- #+END_SRC
-
- This one capture all including standard error, as well as standard output, and it captures by appending.
 
 ** Redirection of command output to files: various options
 
@@ -1280,6 +1696,326 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
   	 upvote
  	 flag
  @karthick87 This is not really related to the question about redirecting output to a file, because it just redirects one stream to another. 2>&1 redirects STDERR to STDOUT, 1>&2 redirects STDOUT to STDERR and 3>&1 would redirect stream 3 to STDERR. – Byte Commander Sep 19 '16 at 16:42
+
+** Keyboard improvement
+
+ The problems:
+
+ - Esc key is too far away, not convenient to access. With spacemacs,
+ it's used very often. Binding it to ,, works most of the time, but not always.
+ (It's a minor problem with ,, bound for esc.)
+
+ - Control key on the left is not convenient to access. It's no longer possible to ctrl-x with one hand with Dvorak keyboard.
+ (A potential solution is to use palm to press it.)
+
+ Potential solutions:
+
+ - Esc:
+   - bound to CAPSLOCKS
+   - bind shift-CAPSLOCKS for CAPSLOCKS
+   - bound to ,,
+   - bind control to esc
+
+ - Control key
+   - use palm to press it
+   - use xcape to bind to long press CAPSLOCKS for left control key
+   - use xcape to bind to long press Enter for the right control key
+   - bind esc to control key
+
+ Map CAPSLOCKS to control and escape both:
+
+ http://tiborsimko.org/capslock-escape-control.html
+
+ #+BEGIN_SRC shell
+ # make CapsLock behave like Ctrl:
+ setxkbmap -option ctrl:nocaps
+
+ # make short-pressed Ctrl behave like Escape:
+ xcape -e 'Control_L=Escape'
+ #+END_SRC
+
+ #+RESULTS:
+
+ Troubleshooting
+ If the CapsLock key gets "stuck" and produces say uppercase letter combinations instead of lowercase ones,
+ the easiest way to remove xcape mapping is to revert CapsLock key function via xmodmap:
+
+ #+BEGIN_SRC shell0
+ xmodmap -e 'keycode 0x42 = Caps_Lock'
+ #+END_SRC
+ followed by re-running of the keyboard modification script.
+
+ More elaborate configuration example:
+
+ #+BEGIN_SRC shell
+ # set internal keyboard layout:
+ deviceid=$(xinput -list | grep 'AT .* keyboard' | head -1 | grep -oE 'id=[0-9]+' | sed 's/id=//g')
+ if [ "${deviceid}" != "" ]; then
+     setxkbmap -device "${deviceid}" dvorak
+     setxkbmap -device "${deviceid}" -option ctrl:nocaps # make CapsLock behave like Ctrl
+ fi
+
+ # set Kinesis keyboard layout:
+ for deviceid in $(xinput -list | grep ' HID ' | grep -oE 'id=[0-9]+' | sed 's/id=//g'); do
+     if [ "${deviceid}" != "" ]; then
+         setxkbmap -device "${deviceid}" us # 'us' but it means 'dvorak' actually due to Kinesis
+         setxkbmap -device "${deviceid}" -option ctrl:nocaps # make CapsLock behave like Ctrl
+     fi
+ done
+ #+END_SRC
+
+ #+BEGIN_SRC shell
+ deviceid=$(xinput -list | grep 'AT .* keyboard' | head -1 | grep -oE 'id=[0-9]+' | sed 's/id=//g')
+ echo $deviceid
+
+ #+END_SRC
+
+ #+RESULTS:
+ : 15
+
+IT seems that $variable and ${variable} are equivalent.
+
+#+BEGIN_SRC shell
+id=15
+echo "Here is id: " $id "and id again: " ${id}
+#+END_SRC
+
+#+RESULTS:
+: Here is id:  15 and id again:  15
+
+There seems a problem that the keyboard setup by setxkbmap might be lost after suspend.
+It's confirmed on the Internet, but no apparent solution has been found.
+
+Let me monitor if the problem happen again.
+
+** Solution to address the lost of keyboard configuration after suspension
+https://unix.stackexchange.com/questions/59623/custom-keyboard-layout-is-reset-to-default-after-standby-or-reboot
+
+Check out this archlinux forum thread Xmodmap Reset after Suspend to RAM.
+There are several examples in the thread that'll get you started and show you
+how to setup a hook
+which will get triggered via the power management subsystem that will run your xmodmap setup each time you come out of suspend.
+
+Something like the following script, saved as /etc/pm/sleep.d/11suspend (change
+the me in /bin/su - me to your actual username):
+
+# content of /etc/pm/sleep.d/11suspend
+#!/bin/bash
+case $1 in
+    hibernate)
+        echo "Hey guy, we are going to suspend to disk!"
+        ;;
+    suspend)
+        echo "Oh, this time we're doing a suspend to RAM. Cool!"
+        ;;
+    thaw|resume)
+        echo "oh, suspend is over, we are in $1 phase..."
+            # Set Display #
+    DISPLAY=:0.0 ; export DISPLAY
+    /bin/su - me -c "sleep 3; /usr/bin/xmodmap /home/me/.xmodmaprc" &
+        ;;
+    *)  echo "somebody is calling me totally wrong."
+        ;;
+esac
+
+In the above need to define ~/.Xmodmap may also need to execute some shell
+commands to execute xcape commands.
+
+** Effective with Googe Keep
+
+*** Export all Keep notes to Google Doc
+https://googlesystem.blogspot.com/2015/08/export-all-your-google-keep-notes.html#gsc.tab=0
+
+** Effective with Google inbox email
+
+*** To out indent in inbox email composition
+
+To out indent, just press two Enter at the indented text!
+
+
+** I may use the Google's python-fire (https://github.com/google/python-fire)
+to ease the workload to convert python libraries into command line tools.
+
+
+
+** Dual boot between Windows 10 and Ubuntu 16.04
+
+1. To boot Windows on Alienware 15 R, the setting of SATA needs to set to RAID
+   ON. It's achieved by pressing F2 while booting up at the BIOS stage to enter into
+   BIOS setup, to perform the setting change of devices.
+2. To boot Ubuntu on Alienware 15 R, the setting of SATA needs to set to ACHI.
+   It's achieved by pressing F2 while booting up at the BIOS stage to enter into
+   BIOS setup, to perform the setting change of devices.
+
+After booting up Windows, it might corrupt the grub boot selection tool, that
+it's no longer possible to select to boot Ubuntu grub. This problem may be fixed by
+running boot repair tool in Ubuntu.
+
+To run Ubuntu in the above failure situation, there a few options:
+
+a. https://itsfoss.com/no-grub-windows-linux/
+1. In Windows, go to the menu
+2. Search for Command Prompt, right click on it to run it as administrator.
+3. Execute in the command prompt:
+#+NAME:
+#+BEGIN_SRC shell
+bcdedit /set {bootmgr} path \EFI\ubuntu\grubx64.efi
+#+END_SRC
+
+Restart and you’ll be welcomed by the familiar Grub screen.
+Remember need to change the SATA setting for Ubuntu to be ACHI!
+
+The above procedure works the best.
+
+b. During booting at the BIOS stage, press F12, to select to boot Ubuntu from
+the hard disk partition for Ubuntu. This one sometimes does not work.
+
+c. Use a USB Ubuntu drive to boot Ubuntu from the USB drive. But settings should
+be made to let the machine first boot from USB device.
+
+
+** Setup cross-machines file sharing and synchronization
+
+   Through Google drive, setup file backup and synchronization on Windows 10,
+   also setup similar on Ubuntu.
+
+
+
+
+** Found a way to do diff for .docx file with git diff
+
+   https://github.com/vigente/gerardus/wiki/Integrate-git-diffs-with-word-docx-files
+   Now my Ubuntu has benn set up to do that.
+
+   It's matter of setting ~/.gitconfig etc.
+
+   For details see the above link
+
+   The full text is copied below:
+
+Integrate git diffs with word docx files
+Ramón Casero edited this page on Jul 10, 2016 · 5 revisions
+ Pages 5
+Home
+Build instructions
+Getting started for new developers
+Integrate git diffs with word docx files
+Technical programming notes
+Clone this wiki locally
+
+https://github.com/vigente/gerardus.wiki.git
+See diffs of .docx files with git wdiff file.docx.
+This section was inspired by Martin Fenner's "Using Microsoft Word with git".
+
+To configure git diff:
+
+Install pandoc.
+
+Tell git how to handle diffs of .docx files.
+
+Create or edit file ~/.gitconfig (linux, Mac) or "c:\Documents and Settings\user.gitconfig" (Windows) to add
+
+ [diff "pandoc"]
+   textconv=pandoc --to=markdown
+   prompt = false
+ [alias]
+   wdiff = diff --word-diff=color --unified=1
+In your paper directory, create or edit file .gitattributes (linux, Windows and Mac) to add
+
+ *.docx diff=pandoc
+You can commit .gitattributes so that it stays with your paper for use in other computers, but you'll need to edit ~/.gitconfig in every new computer you want to use.
+
+Now you can see a pretty coloured diff with the changes you have made to your .docx file since the last commit
+
+git wdiff file.docx
+To see all changes over time
+
+git log -p --word-diff=color file.docx
+Track changes in Word (.docx) documents getting a diff with the commit.
+Automatically when running git commit.
+This is only going to work from linux/Mac or Windows running git from a bash shell.
+
+Install pandoc. Pandoc is a program to convert between different file formats. It's going to allow us to convert Word files (.docx) to Markdown (.md).
+
+Set up git hooks to enable automatic generation and tracking of Markdown copies of .docx files.
+
+Copy these hook files to your git project's .git/hooks directory and rename them, or soft-link to them with ln -s, and make them executable (chmod u+x *.sh):
+
+pre-commit-git-diff-docx.sh -> .git/hooks/pre-commit
+post-commit-git-diff-docx.sh -> .git/hooks/post-commit
+Now every time you run git commit, the pre-commit hook will automatically run before you see the window to enter the log message. The hook is a script that makes a copy in Markdown format (.md) of every .docx file you are committing. The post-commit hook then amends the commit adding the .md files.
+
+Manually by creating a Markdown copy of the .docx file.
+This works in linux, Mac and Windows.
+
+Install pandoc.
+
+Edit your Word document as needed.
+
+Run pandoc from the linux or Windows command line. This will create a Markdown version of your file (without Figures, but with equations in latex format)
+
+ pandoc -s file.docx -t markdown -o file.md
+Update the ChangeLog
+
+Commit both files with git
+
+ git add file.docx file.md
+ git commit
+
+
+** Better conversion from pandoc markdown to Word .docx
+
+   Instead of directly converting from markdown to .docx with pandoc
+
+   use latex as the intermediate so that it may convert better the markdown
+   format:
+
+   pandoc -f markdown -t latex -o mydoc.tex mydoc.md && \
+   pandoc -f latex -t docx --data-dir=docs/rendering/ -o mydoc.docx mydoc.tex
+
+   https://stackoverflow.com/questions/14249811/markdown-to-docx-including-complex-template
+
+
+** A good site on using pandoc for accademic publishing especially to Word/.docx
+
+   https://jabranham.com/blog/2016/11/using-pandoc-export-to-word/
+
+
+** Literate devops as a means to be more effective programmer
+
+   This is a good example of doing literate devops with org-mode
+http://www.howardism.org/Technical/Emacs/literate-devops.html
+
+I also saw one doing similar literate devops with Jupyter Notebook
+
+I may want to study literate devops to overcome my forgetfulness, and lack of
+speed and precision in devops that's necessary for a programmer.
+
+
+** Be careful when executing code block not seeing error nor outcome in org-modern_emacs
+
+With a code block with a name, the output results is append to the result section for the
+same name. If there is duplicated name for another code block, the result will be
+stacked together. If the result section is elsewhere in the file, it might appear that
+the same named code does not produce output.
+
+For example,
+
+#+NAME:block-A
+#+BEGIN_SRC emacs-lisp
+(+ 1 2)
+#+END_SRC
+
+#+RESULTS: block-A
+: HelloWorld!
+: 3
+
+#+NAME:block-A
+#+BEGIN_SRC emacs-lisp
+(concat "Hello" "World!")
+#+END_SRC
+
+This might be a way to compose text using code block!
 
 * Handy languages
 ** Effective C++
@@ -1689,129 +2425,257 @@ find -maxdepth 1 -mtime +15 -exec rm -rf '{}' \;
 
  If a format specifier is for float, if the corresponding value at the run time is of integer value,
  then it would be an error as below.
- To prevent the error message of "valueerror: precision not allowed in integer format specifier"
- when the format specifier is for floating point, while the corresponding value at the run time happens
- to be of integer. The solution is to cast the corresponding value to be float always.
+ To prevent the error message of "value
 
- The following is a solution as an example to illustrate.
+In Python integers will automatically switch
+from a fixed-size int representation into a variable width long representation
+once you pass the value sys.maxint, which is either 2^31 - 1 or 2^63 - 1
+depending on your platform.
+Notice the L that gets appended here:
 
- #+NAME:log_update_state
- #+BEGIN_SRC python :noweb tangle :tangle
-   def noneORfloat(y):
-       return y if y is None else float(y)
+>>> 9223372036854775807
+9223372036854775807
+>>> 9223372036854775808
+9223372036854775808L
+From the Python manual:
 
-   def log_update_state(car_index, light_index_or_last, if_RED, dist_to_light, min_stop_dist, current_velocity, comment):
-       label = ("car index {:4} " +
-                "light index {:4} " +
-                "curr. light color: {:7} " +
-                "dist. to light: {:7.2} " +
-                "min. stop dist. {:7.2} " +
-                "curr. vel. {:7.2}; " +
-                comment)
-       rospy.loginfo(label.format(car_index,
-                                  light_index_or_last,
-                                  if_RED,
-                                  noneORfloat(dist_to_light),
-                                  noneORfloat(min_stop_dist),
-                                  noneORfloat(current_velocity)))
- #+END_SRC
+Numbers are created by numeric literals or as the result of built-in functions and operators. Unadorned integer literals (including binary, hex, and octal numbers) yield plain integers unless the value they denote is too large to be represented as a plain integer, in which case they yield a long integer. Integer literals with an 'L' or 'l' suffix yield long integers ('L' is preferred because 1l looks too much like eleven!).
 
-*** The goodness of iterator in Python
-  let it = iter(sequence)
-  It has next(it) that can more formally and easily by pass an element in a sequence, compared to directly iterate through the sequence.
+Python tries very hard to pretend its integers are mathematical integers and are unbounded. It can, for instance, calculate a googol with ease:
 
-** To iterate through dictionary in Python
+>>> 10**100
+100000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
- For Python 2, use
- for key, val in dict.iteritems():
+*** reload: avoid restarting kernel of Jupyter Notebook when a module is modified
 
- For Python 3,
- for key val in dict.items():
+    The good practice is to have a notebook cell with the reload statement:
+    reload(utils)
+    for example for the module utils,
+
+    This would usually work, if the module dependencies is not too complicated.
+
+    This is much better than to restarting the kernel, which takes much longer
+    time to re-execute all the code.
+https://support.enthought.com/hc/en-us/articles/204469240-Jupyter-IPython-After-editing-a-module-changes-are-not-effective-without-kernel-restart
+
+* Handy for projects
+
+To view the trajectory of the car based on the data from the rosbag
+#+BEGIN_SRC shell
+rosrun tools diagScreenRosbag.py
+#+END_SRC
+
+To view the trajectory of the car in simulator with bigger screen size, and appropriate font size
+#+BEGIN_SRC shell
+rosrun tools diagScreen.py --screensize 3 --fontsize 1
+#+END_SRC
 
 
-** Automate "sandwich" code pattern: with statement
+* Handy SQL Database
 
- For the following pattern of code:
+** Create a database
 
- #+NAME:sandwich
- #+BEGIN_SRC python :noweb tangle :tangle
-   def count_lines(self, file_name):
-           try:
-               f = open(file_name)  # top sandwich
-               try:
-                   return len(f.readlines())  # middle sandwich
-               finally:            # bottom sandwich
-                   f.close()
-           except IOError:
-               # should never happen
-               self.fail()
+create a database with Microsoft SQL Operations Studio
 
- #+END_SRC
+Create a database DWPractice, if it doesn't exist in sys.database
 
- Abstraction to capture the routine pattern of the top and bottom of "sandwich":
+#+BEGIN_EXAMPLE
+USE master
+GO
+IF NOT EXISTS (
+   SELECT name
+   FROM sys.databases
+   WHERE name = N'DWPractice'
+)
+CREATE DATABASE [DWPractice]
+GO
 
- #+NAME:with-sandwich-top-bottom-abstraction
- #+BEGIN_SRC python :noweb tangle :tangle
-   class FileContextManager():
-           def __init__(self, file_name):
-               self._file_name = file_name
-               self._file = None
+ALTER DATABASE [DWPractice] SET QUERY_STORE=ON
+GO
+#+END_EXAMPLE
 
-           def __enter__(self):    # sandwich top
-               self._file = open(self._file_name)
-               return self._file
 
-           def __exit__(self, cls, value, tb):  # sandwich bottom
-               self._file.close()
 
-       # Now we write:
 
-       def count_lines2(self, file_name):
-           with self.FileContextManager(file_name) as f:
-               return len(f.readlines())  # sandwich middle
+** Reference to table in SQL (Mircorsoft SQL server)
 
- #+END_SRC
+   Fully qualified table address:
 
- For file open, Python provides built-in context manager.
+   [database-host-server].[DB-name].[schema-name].[table-name]
 
-** Monkey Patching: it's possible to add methods to a defined class at the runtime in Python
+   For example,
+   [OtherServerName].[OtherDB].[dbo].[OtherTable]
 
- For more details, see the Python Koans on "monkey patched"
- #+NAME:original-class
- #+BEGIN_SRC python :noweb tangle :tangle
- class Dog(object):
-         def bark(self):
-             return "WOOF"
+** To access other databases
 
- #+END_SRC
+   Usually a client is connected to one database, to connect additional
+   database(s) (Linked Databases), in Microsoft SQL Server, use the store procedure:
 
- #+NAME:monkey-patching
- #+BEGIN_SRC python :noweb tangle :tangle
-  def wag(self):
-      return "HAPPY"
+   sp_addlinkedserver: http://msdn.microsoft.com/en-us/library/ms190479.aspx
 
-  self.Dog.wag = wag
+   or you can get to them in SSMS from the following location in the tree of the Object Explorer:
 
- #+END_SRC
+   Server Objects-->Linked Servers
 
- But most built-in types (classes) can not be monkey patched. However, one can overcome the
- limitation by subclassing the built-in classes, and add monkey patching to
- the own subclass.
+   SSMS = Microsoft SQL Server Management Studio
 
- #+NAME:monkey-subclassing
- #+BEGIN_SRC python :noweb tangle :tangle
- class MyInt(int):
-         pass
- self.MyInt.is_even = lambda self: (self % 2) == 0
 
-         self.assertEqual(False, self.MyInt(1).is_even())
-         self.assertEqual(True, self.MyInt(2).is_even())
+** User Guides to Microsoft SQL Operations Studio (SOPS)
 
- #+END_SRC
-** Python's weak module access protection (gentleman's)
+The following one is a good one.
+https://www.red-gate.com/simple-talk/sql/sql-tools/walk-around-sql-operations-studio/
 
- - use __all__ list to selectively open for import *
+This one seems also quite comprehensive:
+http://blog.sqlterritory.com/2017/12/19/sql-operations-studio-comprehensive-guide/
 
- - use _ (underscore) prefix to close to import *
+** The concept of "explain" in Microsoft SQL Operations Studio (SOPS)
 
- - use __ (double underscore) prefix to force to place _ClassName__attribute to access the attribute
+   It's like a dry run to show how a script of SQL statements would be executed
+   to see how feasible or optimal it is.
+
+** It's possible to add constraint of foreign key after a table is created and content inserted
+
+Here is an example,
+#+BEGIN_SRC sql
+ALTER TABLE [dbo].[Sales_F]
+ADD CONSTRAINT [FK_Sales_F_City_Id] FOREIGN KEY (City_Id) REFERENCES [dbo].[City_D] (City_Id)
+ALTER TABLE [dbo].[Sales_F]
+ADD CONSTRAINT [FK_Sales_F_Prod_Id] FOREIGN KEY (Prod_Id) REFERENCES [dbo].[Prod_D] (Prod_Id)
+#+END_SRC
+
+Note, ALTER TABLE [dbo].[Sales_F] is needed for each added constraint.
+
+
+** Connect to SQL server of Microsoft
+
+Using SSMS:
+https://docs.microsoft.com/en-us/sql/linux/sql-server-linux-develop-use-ssms
+
+Provide the host IP address, the database server username and password.
+
+
+
+
+** Gotcha: LineNo in Microsoft SQL Server is a reserved word should not be used as filed name!
+
+https://stackoverflow.com/questions/4054511/what-exactly-does-the-t-sql-lineno-reserved-word-do
+
+The symptom would be when 'LineNo' is used as field name, the editor would show
+syntax error around 'LineNo'.
+
+
+** With Microsoft SQL Server, Date and DateTime accept usual literal form in strings
+
+   https://stackoverflow.com/questions/12957635/sql-query-to-insert-datetime-in-sql-server
+
+https://technet.microsoft.com/en-us/library/ms180878(v=sql.105).aspx#StringLiteralDateandTimeFormats
+
+Unlike Oracle or MySQL, no procedure of transformation of to_date, etc. is
+needed.
+
+But Microsoft SQL Server does support CAST and CONVERT to do the transformation.
+
+
+
+** Never select region of text in SQL script editor of SSMS or SOPS of Microsoft when running the script
+
+   Or, it will only execute the seletect the text as store procedure, instead of
+   the whole script in the editor.
+
+   https://stackoverflow.com/questions/25270305/initial-error-when-querying-sql-server-2012-database
+
+
+** Change to table definitions
+
+https://www.techonthenet.com/sql_server/tables/alter_table.php
+
+Especially, for Microsoft SQL (Transact-SQL), one should use sp_rename to rename
+a column (field) name.
+
+
+
+** To be able to access all tables in different database in a database server?
+
+The table name must be fully qualified with database name, schema name and
+table name to let the statement block work. For example,
+
+#+NAME:using-properties
+#+BEGIN_SRC sql :noweb no-export :tangle
+select * from OtherDW.dbo.Supplier_D
+#+END_SRC
+
+#+RESULTS: using-properties
+| Supplier_Id | Supplier_Name |
+|-------------+---------------|
+|           1 | Walmart       |
+|           2 | Amazon        |
+
+
+** to execute SQL code block org-mode (literate DBMS) with Mircorsoft SQL Server on Ubuntu
+
+Here is an good example of literate DBMS:
+http://www.howardism.org/Technical/Emacs/literate-database.html
+
+So far to to be execut SQL block in org-mode with Microsoft SQL Server,
+the header arguments must be explicitly placed at the header of an SQL block.
+(Defining them as properties doesn't work! It is supposed to work per
+https://www.gnu.org/software/emacs/manual/html_node/org/Header-arguments-in-Org-mode-properties.html
+)
+
+#+NAME:test
+#+BEGIN_SRC sql :noweb no-export :tangle :engine mssql :cmdline "-S localhost -U SA -P 27Wangzi15"
+select * from [DWPractice].[dbo].[Sales_F]
+#+END_SRC
+
+#+RESULTS: test
+| City_id | Prod_id |      Month | Customer_Id | Supplier_Id | Units | Dollars |
+|---------+---------+------------+-------------+-------------+-------+---------|
+|       1 |     288 | 2008-01-01 |           3 |           1 |     4 |  7.3200 |
+|       1 |     288 | 2008-02-01 |           1 |           1 |    16 | 42.4000 |
+|       1 |     589 | 2008-01-01 |           1 |           2 |     3 |  7.9500 |
+|       2 |     288 | 2008-01-01 |           2 |           2 |     4 |  7.3200 |
+|       2 |     589 | 2008-01-01 |           2 |           1 |     3 |  7.9500 |
+
+#+NAME:test-1
+#+BEGIN_SRC sql :noweb no-export :tangle :engine mssql :cmdline "-S localhost -U SA -P 27Wangzi15"
+select * from OtherDW.dbo.Supplier_D
+#+END_SRC
+
+#+RESULTS: test-1
+| Supplier_Id | Supplier_Name |
+|-------------+---------------|
+|           1 | Walmart       |
+|           2 | Amazon        |
+
+
+*** Use global properties in org-mode
+ But using global properties setting would work:
+ #+PROPERTY: header-args:sql :engine mssql :cmdline -S localhost -U SA -P 27Wangzi15
+
+
+
+** A very practical web site on SQL tips
+
+https://blog.sqlauthority.com/2009/07/17/sql-server-two-methods-to-retrieve-list-of-primary-keys-and-foreign-keys-of-database/
+* Handy Networking
+
+** Check whether a port is opened or not in Unix/Linux/Ubuntu
+
+good ways to find out what ports are listenting and what your firewall rules are:
+
+    sudo netstat -tulpn
+
+    sudo ufw status
+https://askubuntu.com/questions/9368/how-can-i-see-what-ports-are-open-on-my-machine
+
+** Find out the IP address of my computer of Ubuntu
+
+ifconfig
+
+looking for the interface with the significant traffic.
+
+Or,
+
+route
+
+looking for the line start with 'default'.
