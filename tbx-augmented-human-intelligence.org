@@ -350,33 +350,7 @@ The alternative of using mplayer to view the same file worked. So the case is cl
        target_path = os.path.expanduser(target_path)
        mkdir_if_not(target_path)
        import zipfile
-       with zipfile.Zip2017-08-08 10:27:53.180144: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.1 instructions, but these are available on your machine and could speed up CPU computations.
- 2017-08-08 10:27:53.180170: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.2 instructions, but these are available on your machine and could speed up CPU computations.
- 2017-08-08 10:27:53.180176: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
- 2017-08-08 10:27:53.180181: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
- 2017-08-08 10:27:53.180185: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use FMA instructions, but these are available on your machine and could speed up CPU computations.
- 2017-08-08 10:27:53.528010: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:893] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
- 2017-08-08 10:27:53.528649: I tensorflow/core/common_runtime/gpu/gpu_device.cc:940] Found device 0 with properties:
- name: GeForce GTX 1070
- major: 6 minor: 1 memoryClockRate (GHz) 1.645
- pciBusID 0000:01:00.0
- Total memory: 7.92GiB
- Free memory: 7.32GiB
- 2017-08-08 10:27:53.528682: I tensorflow/core/common_runtime/gpu/gpu_device.cc:961] DMA: 0
- 2017-08-08 10:27:53.528692: I tensorflow/core/common_runtime/gpu/gpu_device.cc:971] 0:   Y
- 2017-08-08 10:27:53.528713: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1030] Creating TensorFlow device (/gpu:0) -> (device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0)
- Device mapping:
- /job:localhost/replica:0/task:0/gpu:0 -> device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0
- 2017-08-08 10:27:53.609874: I tensorflow/core/common_runtime/direct_session.cc:265] Device mapping:
- /job:localhost/replica:0/task:0/gpu:0 -> device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0
-
- MatMul: (MatMul): /job:localhost/replica:0/task:0/gpu:0
- 2017-08-08 10:27:53.629104: I tensorflow/core/common_runtime/simple_placer.cc:847] MatMul: (MatMul)/job:localhost/replica:0/task:0/gpu:0
- b: (Const): /job:localhost/replica:0/task:0/gpu:0
- 2017-08-08 10:27:53.629124: I tensorflow/core/common_runtime/simple_placer.cc:847] b: (Const)/job:localhost/replica:0/task:0/gpu:0
- a: (Const): /job:localhost/replica:0/task:0/gpu:0
- 2017-08-08 10:27:53.629131: I tensorflow/core/common_runtime/simple_placer.cc:847] a: (Const)/job:localhost/replica:0/task:0/gpu:0
- File(file_zipped, 'r') as zip_ref:
+       with zipfile.ZipFile(file_zipped, 'r') as zip_ref:
            zip_ref.extractall(target_path)
  #+END_SRC
 
@@ -804,6 +778,20 @@ echo !$
 
     However, once with ssh set up, actually even the correct username/password would not work, thus
     one has to use ssh!
+
+    For Mac machine, following the link: https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/
+
+    It's need to add the private key to the local ssh-agent:
+
+#+NAME:
+#+BEGIN_SRC shell
+# Start the ssh-agent in the background.
+eval "$(ssh-agent -s)"
+# Agent pid 59566
+
+# Add your SSH private key to the ssh-agent. If you created your key with a different name, or if you are adding an existing key that has a different name, replace id_rsa in the command with the name of your private key file.
+ssh-add ~/.ssh/id_rsa
+#+END_SRC
 
 
 *** Shell script to add to a new github repository
@@ -1265,7 +1253,7 @@ p(W_{d,n}, Z_{d,n}, for \ n \in \{1, \dots, N \},
 
     It seems that this is a bug. That I should report.
 
-    So the moral of the story is that use I should use no-export instead of
+    So the moral of the story is that I should use no-export instead of
     tangle to achieve my desired effect: to tangle and evaluate, but do not
     export.
 
@@ -1324,6 +1312,16 @@ p(W_{d,n}, Z_{d,n}, for \ n \in \{1, \dots, N \},
     to positions.
 
     zz is equivalent to CTRL-l, z. also move to the first non-blank character
+
+
+** Effective with Linux
+
+*** How to figure out which program caused a core dump
+#+NAME:gdb_core
+#+BEGIN_SRC shell
+gdb -c core
+#+END_SRC
+
 
 * Handy languages
 ** Effective C++
@@ -1400,6 +1398,10 @@ p(W_{d,n}, Z_{d,n}, for \ n \in \{1, \dots, N \},
 
     Note, to express a map from string to vector pointer should be as following:
     map<string, vector<double>* > // not map<string, *vector<double> >
+
+*** Note: jupyter when running, may cause Ubuntu 16.04 not suspend properly, and it will not resume. The system has to be turned off and restarted: the solution is to kill the jupyter process
+
+    Before suspending system.
 
 *** Effective C++/C debug
 
@@ -1760,7 +1762,7 @@ Python tries very hard to pretend its integers are mathematical integers and are
 *** reload: avoid restarting kernel of Jupyter Notebook when a module is modified
 
     The good practice is to have a notebook cell with the reload statement:
-    reload(utils)
+    reload(utils) (for Python 2), import importlib; importlib.reload(utils) (for python 3)
     for example for the module utils,
 
     This would usually work, if the module dependencies is not too complicated.
@@ -1781,6 +1783,207 @@ import sys
 reload(sys) # This is necessary, otherwise, the following setdefaultencoding would not be available
 sys.setdefaultencoding('utf-8')
 #+END_SRC
+
+*** Capture the installed libraries in an environment
+
+#+NAME:pip_freeze
+#+BEGIN_SRC shell
+pip freeze > requirements.txt
+#+END_SRC
+
+capture the required libraries in the file requirements.txt
+
+*** Install libraries according to requirements
+
+#+NAME:pip_install_according_requirements
+#+BEGIN_SRC shell
+pip install -r requirements.txt
+#+END_SRC
+
+Where requirements.txt is the output from pip freeze > requirements.txt
+
+requirements.txt may have the following content for example:
+#+BEGIN_EXAMPLE
+simplegeneric==0.8.1
+# SimpleWebSocketServer==0.1.0
+six==1.11.0
+toolz==0.8.2
+torch
+torchvision==0.2.0
+tornado==4.5.3
+#+END_EXAMPLE
+
+It's possible to comment out item required.
+
+With the presence of ==0.8.2 it will installs the library with the particular
+version.
+
+Without version, it will just install the latest available.
+
+*** Create virtualenv
+
+There are quite a few approaches.
+
+- pyenv
+-
+
+**** Working with pyenv
+
+
+***** installation
+
+ The following link has good instruction.
+ https://amaral.northwestern.edu/resources/guides/pyenv-tutorial
+
+ It almost work. Except that any
+ potential change to ~/.bashrc will only take effect in a new shell or after
+ executing
+
+ #+NAME:source_bashrc
+ #+BEGIN_SRC shell
+source ~/.bashrc
+ #+END_SRC
+
+ The following commands works for installation, while the other alternative
+ didn't work for me at Ubuntu 16.04
+
+ #+NAME:install_pyenv
+ #+BEGIN_SRC shell
+cd
+git clone git://github.com/yyuu/pyenv.git .pyenv
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+source ~/.bashrc
+ #+END_SRC
+
+ Note, the key to source ~/.bashrc
+
+***** Some useful commands
+
+pyenv global
+shows the global state of pyenv
+
+pyenv global 3.6.3
+make python 3.6.3 to be the global python version
+
+pyenv gloabl system
+make system installation python as the global
+
+pyenv local
+shows the local python selected
+
+pyenv local 3.6.3
+makes python 3.6.3 the local python version
+
+pyenv versions
+show python versions available
+
+pyenv install 3.6.3
+install a particular python version under pyenv
+
+***** Make a local selection of python version
+
+It seems that it has to be an empty directory,
+#+NAME:select_local_python_version
+#+BEGIN_SRC shell
+mkdir a_new_project
+cd a_new_project
+pyenv local 3.6.3
+source ~/.bashrc # a must! or start a new shell as equivalent
+python -V # new local python version shown
+cd ..
+python -V # gloabl (default) python version shown
+#+END_SRC
+
+***** Create virtualenv with pyenv
+
+#+NAME:install_virtualenv_plugin
+#+BEGIN_SRC shell
+git clone https://github.com/yyuu/pyenv-virtualenv.git ~/.pyenv/plugins/pyenv-virtualenv
+source ~/.bashrc
+#+END_SRC
+
+#+NAME:create_virtualenv
+#+BEGIN_SRC shell
+cd ~
+mkdir ~/virtual_env
+cd virtual_env/
+pyenv virtualenv 3.6.3 udacity_workspace
+pyenv activate udacity_workspace
+#+END_SRC
+
+#+NAME:deactivate_virtualenv
+#+BEGIN_SRC shell
+pyenv deactivate
+#+END_SRC
+
+
+
+*** Note, Python library may be made available by different library name.
+
+For example, for skvideo, it can be installed by the following:
+
+#+NAME:install_skvideo
+#+BEGIN_SRC shell
+pip install scikit-video
+#+END_SRC
+
+and for PIL
+
+#+NAME:install_PIL
+#+BEGIN_SRC shell
+pip install pillow
+#+END_SRC
+
+*** Note, path or directory for storing python package *.pth files must be provisioned
+
+- Having the path as part of PYTHONPATH is one of the easier way to provision:
+
+#+NAME:add_path_for_python_pth_files
+#+BEGIN_SRC shell
+export PYTHONPATH=$PYTHONPATH:/home/yubrshen/.local/lib/python3.6/site-packages
+#+END_SRC
+
+The above command provision /home/yubrshen/.local/lib/python3.6/site-packages to
+store *.pth python package/library.
+
+Such command typically is placed in ~/.bashrc
+
+*** To install pygpu, pip install pygpu does not work, the following may work:
+
+https://github.com/roebius/deeplearning_keras2/files/1332072/install_gpuarray_pygpu.sh.zip
+
+*** with matplotlib.pyplot.imshow(image), the value of image is assumed to either float in [0, 1] or integer [0, 255]
+
+    For float value, if it's larger than 1 or smaller than 0, will be clipped.
+    This may cause problem if the image is type float, but the value is actually
+    in [0.0, 255.0] converted from integer [0, 255], then it will be clipped to
+    be in the range of [0.0, 1.0] removing almost all those values larger than
+    1.0. The image would be severely distorted when shown by imshow, but the
+    actualy value of the array of arrays, just have type difference.
+
+    Fortunately, imshow will show the error message: "Clipping input data to the
+    valid range for imshow with RGB data ([0..1] for floats or [0..255] for
+    integers)"
+otherwise, the values will be clipped to be in the range!
+
+*** In Tensorflow, a tensor is just a device (object) to express the value (how to compute the value), but not the value itself
+
+    To get the concrete value that a tensor represents, it should be executed
+    within a session environment, for example,
+
+#+NAME:evaluate_tensor
+#+BEGIN_SRC python :noweb no-export :tangle
+a_tensor = tf.constant([1, 2, 3], dtype=tf.uint8)
+
+with tf.Session() as sess:
+    sess.run(a_tensor)
+#+END_SRC
+
+*** Note, I have both pip and miniconda3 environment setting up for Python development
+
+    I may choose to either one for convenience
 
 * Handy for projects
 
@@ -2003,3 +2206,204 @@ Or,
 route
 
 looking for the line start with 'default'.
+
+
+
+* Handy with system
+
+** Use of docker to ease environment setup
+
+Here is a typical setting up an environment:
+
+#+NAME:
+#+BEGIN_SRC shell
+sudo docker run -p 8888:8888 andrewjstryker/taboo
+#+END_SRC
+
+The above command will take care of downloading and setting up the expected
+environment.
+
+In Ubuntu, sudo is needed.
+
+* Inbox
+
+** How to use pyenv virtualenv with jupyter lab?
+
+** How to use pyenv virtualenv with emacs?
+
+
+** The problem of not able to import tensorflow with tensorflow-gpu
+
+   The current problem is that the cuda installed is of version 9.1, but
+   tensorflow-gpu expects cuda version 9.0
+
+   Now, I need to install cuda 9.0
+
+   I was only able to install cuda 9.0
+
+   By the following link:
+
+   https://developer.nvidia.com/cuda-90-download-archive?target_os=Linux&target_arch=x86_64&target_distro=Ubuntu&target_version=1604&target_type=runfilelocal
+
+   with runfile (shell script), not with deb file (apt install cuda)
+
+   It seems that my apt system setup might have something wrong with Nvida
+   repository. I kept getting the error of "not able to locate cuda".
+
+
+   The problem is that tensorflow-gpu expects particular version of cudu, not
+   the latest, or whatever installed. I have to install the exact cuda version
+   to make it work.
+
+
+** not found: cv2 in python library
+
+#+NAME:install_cv2
+#+BEGIN_SRC shell
+pip install opencv-python
+#+END_SRC
+
+
+
+** The problem of "ValueError: Fetch argument 'logits' cannot be interpreted as a Tensor." ("The name 'logits' refers to an Operation not in the graph.")
+
+   When retrieving tensor logits from saved model.
+
+   I don't really fully understand how the save model work. Try to use the other
+   way, checkpoint, as an alternative.
+
+
+*** For tensorflow.argmax to work, output_type=tf.int32 must be in the parameter list
+
+Otherwise, it will have the error of
+"tensorflow.python.framework.errors_impl.InvalidArgumentError: TensorArray dtype
+is int64 but Op is trying to write dtype int32."
+
+as shown in the following error trace:
+
+Traceback (most recent call last):
+  File "train.py", line 406, in <module>
+    run()
+  File "train.py", line 389, in run
+    logits, keep_prob, image_input)
+  File "train.py", line 345, in save_inference_samples
+    for name, image, marked in image_outputs:
+  File "train.py", line 314, in gen_test_output
+    im_labels = segment(image, sess, logits, image_input, keep_prob)
+  File "train.py", line 291, in segment
+    tf.argmax(logits, axis=1, output_type=tf.int64))], feed_dict = feed)
+  File "/home/yubrshen/.pyenv/versions/udacity_workspace/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 900, in run
+    run_metadata_ptr)
+  File "/home/yubrshen/.pyenv/versions/udacity_workspace/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1135, in _run
+    feed_dict_tensor, options, run_metadata)
+  File "/home/yubrshen/.pyenv/versions/udacity_workspace/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1316, in _do_run
+    run_metadata)
+  File "/home/yubrshen/.pyenv/versions/udacity_workspace/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1335, in _do_call
+    raise type(e)(node_def, op, message)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: TensorArray dtype is int64 but Op is trying to write dtype int32.
+	 [[Node: map/while/TensorArrayWrite/TensorArrayWriteV3 = TensorArrayWriteV3[T=DT_INT32, _device="/job:localhost/replica:0/task:0/device:CPU:0"](map/while/TensorArrayWrite/TensorArrayWriteV3/Enter, map/while/Identity/_225, map/while/TensorArrayWrite/value, map/while/Switch_1/_227)]]
+	 [[Node: map/while/TensorArrayWrite/TensorArrayWriteV3/_229 = _Recv[client_terminated=false, recv_device="/job:localhost/replica:0/task:0/device:GPU:0", send_device="/job:localhost/replica:0/task:0/device:CPU:0", send_device_incarnation=1, tensor_name="edge_309_map/while/TensorArrayWrite/TensorArrayWriteV3", tensor_type=DT_FLOAT, _device="/job:localhost/replica:0/task:0/device:GPU:0"](^_cloopmap/while/NextIteration_1/_158)]]
+
+Even though, the document said that output_type is optional and default to
+tf.int64,
+
+This happened as of May 24, 2018.
+
+
+
+* Shell: invoke the previous command !!
+
+For example, if the first command is the following:
+
+#+NAME:shell
+#+BEGIN_SRC python :noweb no-export :tangle
+ls -lt
+#+END_SRC
+
+If I want to do sudo ls -lt
+then
+#+NAME:
+#+BEGIN_SRC shell
+sudo !!
+#+END_SRC
+
+!! will substitute the previous command.
+
+Even it can be used to invoke the previous command alone.
+
+* Shell: reuse the arguments of the previous command: !@
+
+* Shell: enable to enter into vi editor for command line editing
+
+#+NAME:
+#+BEGIN_SRC shell
+export VISUAL=vi
+#+END_SRC
+
+Put the above command in ~/.inputrc, to enable to invoke vi for command line
+editing:
+
+in a command line, when needing to invoke vi to edit the current command line,
+press ESC, then v, the vi editor will be invoked with the current command line
+as the content,
+after editing, save the content by :wq, then the content of the command will be
+executed.
+
+* Shell: enable vi for command line editing
+
+#+NAME:
+#+BEGIN_SRC shell
+set editing-mode vi
+#+END_SRC
+
+Put the command in ~/.inputrc to make the behavior permanent.
+
+* Shell: append content to a file
+
+#+NAME:
+#+BEGIN_SRC shell
+echo "set editing-mode vi" >> ~/.inputrc
+#+END_SRC
+
+* Shell: more flexible access of file's tail by using less with command SHIFT-f
+
+In the less command display, press SHIFT-f will move to the end of the file.
+Then Ctrl-C will exit to the end of the file resuming the ordinary less file
+browsing.
+
+* Shell: clear or reset the current shell
+
+#+NAME:
+#+BEGIN_SRC shell
+clear
+#+END_SRC
+
+Clear the display in the current shell
+
+#+NAME:
+#+BEGIN_SRC shell
+reset
+#+END_SRC
+
+Reset the shell. It's not clear to me what's been reset.
+
+* emacs: undo C-/, redo C-?
+
+This is proven to be working.
+
+* emacs: spacemacs Cycle themes with SPC T n
+
+* emacs: export org-mode to PDF with Chinese text in unicode
+
+adding following option to the org document.
+
+#+LATEX_HEADER: usepackage{xltxtra}
+#+LATEX_HEADER: setmainfont{WenQuanYi Micro Hei}
+Also need to customize emacs latex to pdf process.
+
+(setq org-latex-to-pdf-process
+      '("xelatex -interaction nonstopmode -output-directory %o %f"
+        "xelatex -interaction nonstopmode -output-directory %o %f"
+        "xelatex -interaction nonstopmode -output-directory %o %f"))
+PS: The main font has been setted may be vary among different systems. How I
+      find a proper font under ubuntu is via command fc-list.
