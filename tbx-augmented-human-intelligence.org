@@ -1314,6 +1314,10 @@ p(W_{d,n}, Z_{d,n}, for \ n \in \{1, \dots, N \},
     zz is equivalent to CTRL-l, z. also move to the first non-blank character
 
 
+
+*** Command to produce PDF from pandoc-mode for md: C-c / p
+    Select output format: latex
+
 ** Effective with Linux
 
 *** How to figure out which program caused a core dump
@@ -2333,7 +2337,11 @@ Even it can be used to invoke the previous command alone.
 
 * Shell: reuse the arguments of the previous command: !@
 
-* Shell: enable to enter into vi editor for command line editing
+* Shell: enable to enter into vi editor for command line editing (not working)
+#export VISUAL=vi
+#Note in my Ubuntu 16.04 environment export VISUAL=vi resulting shell not able to type character 'e'
+
+So the following does not work for me in Ubuntu 16.04
 
 #+NAME:
 #+BEGIN_SRC shell
@@ -2396,9 +2404,9 @@ This is proven to be working.
 * emacs: export org-mode to PDF with Chinese text in unicode
 
 adding following option to the org document.
+#+LATEX_HEADER: \usepackage{xltxtra}
+#+LATEX_HEADER: \setmainfont{WenQuanYi Micro Hei}
 
-#+LATEX_HEADER: usepackage{xltxtra}
-#+LATEX_HEADER: setmainfont{WenQuanYi Micro Hei}
 Also need to customize emacs latex to pdf process.
 
 (setq org-latex-to-pdf-process
@@ -2407,3 +2415,204 @@ Also need to customize emacs latex to pdf process.
         "xelatex -interaction nonstopmode -output-directory %o %f"))
 PS: The main font has been setted may be vary among different systems. How I
       find a proper font under ubuntu is via command fc-list.
+
+This is based on https://freizl.github.io/posts/2012-04-06-export-orgmode-file-in-Chinese.html
+
+* emacs: org-mode with Chinese text exported to PDF, must add space between the Chinese words (phrases)
+
+In order to let xelatex do proper line wrapping, otherwise, it will treat the
+whole of Chinese text as one word causing hbox overflow errors.
+
+By the same token, use ascii number rather than unicode numbers as much as
+possible to make line wrapping easier.
+
+
+* How to update latexmk
+
+latexmk is a make program for latex.
+
+Download the a desired version (latest) from http://personal.psu.edu/jcc8//software/latexmk-jcc/
+extract latexmk.pl into a directory, say ~/tmp/latexmk/
+cd into that directory:
+#+NAME:install_latexmk
+#+BEGIN_SRC shell
+sudo cp ./latexmk.pl /usr/bin/latexmk
+#+END_SRC
+
+* Python: example of assignment to list from list
+
+#+NAME:
+#+BEGIN_SRC python :noweb no-export :tangle
+name, *line = input().split()
+#+END_SRC
+
+* Juypter notebook: add tags to a cell
+
+First make the field and the icon of "add tag" visible, by selecting View -> Cell
+Toolbar -> Tags
+
+Then there is a button with label "Add Tags" on the top right corner above a
+cell. The icon "..." edit the existing tags, and a field to add new tag are just
+to the left of the label "Add Tags", right justified. (The button actually does
+not sever as a button, but just a label to indicate the field and the icon next
+to it. It might be more helpful to provide hint when one clicks on the button on
+how to add tags.)
+
+The problem: the borders of the field to add tags, as well as the icon "..." for editing the tags for a cell is too faint that it's hardly visible for people with color blindness, causing them not able to figure out how to add tags to the cell.
+
+The solution: make the borders and the icon have greater contrast to be more
+visible even for the color blinded.
+
+* Jupyter notebook: cell toolbar
+
+Cell toolbar provides more functionality related to a particular cell. The
+functionalists includes adding tags, adding meta data, arrange the cell for
+slide, etc.
+
+It's accessible by View -> Cell Toolbar ->
+
+
+
+* Python: Capitalize words preserving the number of spaces
+
+#+NAME:
+#+BEGIN_SRC python :noweb no-export :tangle
+import string
+def solve(s):
+  return string.capwords(s, ' ')
+#+END_SRC
+
+string.capwords with ' ' as the argument for separator will preserve the number
+of spaces between the words.
+
+
+* Flutter tbx
+
+** Create a new project from command line
+
+#+NAME:
+#+BEGIN_SRC shell
+flutter create hello_rectangle
+#+END_SRC
+
+** Run flutter project from command line
+
+Inside the directory of the project:
+
+#+NAME:
+#+BEGIN_SRC shell
+flutter run
+#+END_SRC
+
+
+** The sample code from Google/Udacity Flutter course
+
+https://github.com/flutter/udacity-course/tree/master/course/01_hello_rectangle/solution_01_hello_rectangle
+https://github.com/flutter/udacity-course
+
+** For the problem missing AVD (Android Virtual Device) manager
+
+   I ran into the problem that I could not find AVD in Android Studio Tools
+   menu.
+
+   The problem was solved by resetting SDK selection/path and restart the
+   Android Studio. The SDK selection is set to 'Android API 28 Platform'.
+
+   The setting of SDK is via Android Studio menu File/Project Structure/SDK
+
+   AVD is required to start the Android emulator.
+
+   Note, the above solution does not persist. After quitting, when restarting,
+   the menu for Tool/Android/AVD manager disappeared again.
+
+
+** To start AVD from command line
+
+#+NAME:
+#+BEGIN_SRC shell
+~/Android/Sdk/emulator/emulator @AVD_name
+#+END_SRC
+
+
+** Alternative way to access AVD manager and start emulator
+
+   In Android Studio, with menu Help/Find Action, in the input panel enter AVD
+   manager, and double click mouse on the first found entry, it will launch AVD
+   manager. (With AVD manager, one can start the AVD (Android Virtual Device).
+
+   This tricks works well with Android Studio version 3.1.3, when the menu for
+   AVD manager disappeared in Tools/
+
+
+** The feedback of starting AVD manager inside Android Studio
+
+The error message's summary is shown at the left bottom of Android Studio.
+Double click on the summary will show the detailed message.
+
+
+** Solution to "emulator: ERROR: Not enough disk space to run AVD <emulator-name> Exiting" with AVD manager or command line to start an AVD
+
+1. Wipe out the AVD's data per https://stackoverflow.com/questions/26593711/android-5-0-emulator-showing-storage-space-running-out
+
+2. Increase the size of memory in the AVD configuration
+3. Make sure the directory where ~/.android is has enough space
+
+
+** Re-install Android studio to solve the crash when starting the studio
+
+   Re-install flutter at ~/programming/flutter
+   Remove Android/Sdk (default at ~/Android/Sdk)
+   Remove ~/.android
+   Remove ~/.AndroidStudio3.1
+
+   Re-install studio by
+   1. Download the file for Linux;
+   2. Extract from the zip file
+   3. From the extracted, executing android-studio/bin/studio.sh and follow the
+   wizard, select custom installation, install the Sdk at a custom location,
+   update ANDROID_HOME to reflect the custom location in ~/.bashrc
+
+   Use flutter doctor -v to diagnose problems.
+
+   To launch the studio again, execute studio.sh
+
+   Overall, following the "Getting Started" guide of Flutter.
+
+   Here is a guide helpful for complete uninstall: https://askubuntu.com/questions/546723/uninstall-android-studio-completely
+
+* The best regular expression developer
+
+It's online:
+
+https://regex101.com/
+
+* Python: note the different semantics of groupby than that in Pandas or in SQL
+
+  Its semantics can be illustrated as following:
+
+  # [k for k, g in groupby('AAAABBBCCDAABBB')] --> A B C D A B
+  # [list(g) for k, g in groupby('AAAABBBCCD')] --> AAAA BBB CC D
+
+  It only extracts the consecutive elements' the sameness according to a mapping
+  function. In Clojure, there is a similar function.
+
+
+* Trick to make multiple monitors working with Ubuntu 16.04 and my external monitor
+
+  Sometimes, it does not work to have the external monitor on top of the
+  built-in display, even with setting with Displays setting software and ARandR.
+  It would make the external monitor black.
+
+  The work-around is to use ARandR to have the HDMI as the sole display, then
+  re-set with ARandR to be of vertical setting. It worked in my attempt on Aug.
+  2nd, 2018.
+
+* Tricks of coding with word processor Google doc or Microsoft Wrod
+
+  Try to use ''' ''' for block comment, to make it easier to write arbitrary
+  length of comments.
+
+  Turn off smart quote to keep the block comment.
+
+  Use a lots of comment to expression the intention to easier understand, when
+  the format might not be fully working or correct.
