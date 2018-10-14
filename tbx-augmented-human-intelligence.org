@@ -2401,6 +2401,7 @@ This is proven to be working.
 
 * emacs: spacemacs Cycle themes with SPC T n
 
+  To select a theme available.
 * emacs: export org-mode to PDF with Chinese text in unicode
 
 adding following option to the org document.
@@ -2616,3 +2617,9 @@ https://regex101.com/
 
   Use a lots of comment to expression the intention to easier understand, when
   the format might not be fully working or correct.
+
+* Send links to desktop from wechat
+
+  Open wechat application on desktop in browser, then from the wechat session in
+  mobile phone send the links to a special "user" file transfer. At the desktop
+  session, one can access the links.
