@@ -1288,6 +1288,11 @@ p(W_{d,n}, Z_{d,n}, for \ n \in \{1, \dots, N \},
        #+END_SRC
 
 
+
+*** Caution: when assigning string value to variable in emacs lisp, quotation "" must be used
+
+    Otherwise, the error of "eval-buffer: Symbol's value as variable is void"
+
 *** Address the error message of "Evaluation of code disabled" when C-C-c executing code in org-mode
 
     With spacemacs, after upgrading packages, this may happen. The solution is
@@ -1315,9 +1320,6 @@ p(W_{d,n}, Z_{d,n}, for \ n \in \{1, \dots, N \},
 
 
 
-*** Command to produce PDF from pandoc-mode for md: C-c / p
-    Select output format: latex
-
 ** Effective with Linux
 
 *** How to figure out which program caused a core dump
@@ -1326,6 +1328,55 @@ p(W_{d,n}, Z_{d,n}, for \ n \in \{1, \dots, N \},
 gdb -c core
 #+END_SRC
 
+*** To make pandoc to pdf work, needs to install pdflatex
+
+    The best option is to install texlive from the source
+
+https://www.tug.org/texlive/quickinstall.html
+
+*** Command to produce PDF from pandoc-mode for md: C-c / p
+    Select output format: latex
+
+*** To fix the problem of fonts not loadable (missing) with pdflatex/pandoc
+
+! Font T1/cmr/m/n/10=ecrm1000 at 10.0pt not loadable: Metric (TFM) file not fou
+nd.
+<to be read again>
+                   relax
+l.105 \fontencoding\encodingdefault\selectfont
+
+pandoc: Error producing PDF
+
+when producing pdf from markdown (md) file, such as
+pandoc manager-or-technical-program-manager/extended-cv-yushen.md -o yushen-manager.pdf
+
+The solution in Ubuntu 18.04:
+sudo apt-get install texlive-fonts-recommended
+
+*** To fix the error of LaTeX Error: File `fancyvrb.sty' not found.
+
+pandoc manager-or-technical-program-manager/extended-cv-yushen.md -o yushen-manager.pdf
+! LaTeX Error: File `fancyvrb.sty' not found.
+
+Type X to quit or <RETURN> to proceed,
+or enter new name. (Default extension: sty)
+
+Enter file name:
+! Emergency stop.
+<read *>
+
+Solution on Ubuntu:
+sudo apt-get install texlive-full
+
+or install TexLive from the source:
+https://www.tug.org/texlive/quickinstall.html
+
+
+
+* Meta: when having error message in running program,
+
+first copy the error message and use Google to search for related solutions or
+information.
 
 * Handy languages
 ** Effective C++
